@@ -1,0 +1,5 @@
+Model,Status,Batch 32,Batch 16,Test evaluated,Excluded from quantitative ranking,Notes
+Custom CNN,COMPLETE,Used,Not applicable,YES,NO,C:\Users\yesam\Desktop\anviksa_ai\results\custom_cnn\20260830T142449Z_c23a5d39
+MobileNetV2,COMPLETE,Used,Not applicable,YES,NO,C:\Users\yesam\Desktop\anviksa_ai\results\mobilenet_v2\20260830T161743Z_552c91eb
+MobileNetV3 Large,COMPLETE,Used,Not applicable,YES,NO,C:\Users\yesam\Desktop\anviksa_ai\results\mobilenet_v3_large\20260830T171150Z_94069968
+EfficientNetB0,RESOURCE-LIMITED / INCOMPLETE,Confirmed TensorFlow ResourceExhaustedError,Passed diagnostic preflight; training terminated during fine-tuning with Windows access violation under severe memory pressure,NO,YES,Attempted — excluded from quantitative comparison because training could not complete under the available computational resources.

@@ -1,0 +1,15 @@
+ANVIKSA AI CLASSIFICATION REPORT
+
+                    precision    recall  f1-score   support
+
+               Cow     1.0000    1.0000    1.0000        39
+              Deer     0.9861    0.9861    0.9861        72
+          Elephant     0.9405    1.0000    0.9693        79
+            Monkey     1.0000    1.0000    1.0000        28
+Non_Venomous_Snake     0.9062    0.9062    0.9062       128
+    Venomous_Snake     0.9130    0.8936    0.9032       141
+         Wild_Boar     0.9643    0.9310    0.9474        58
+
+          accuracy                         0.9413       545
+         macro avg     0.9586    0.9596    0.9589       545
+      weighted avg     0.9412    0.9413    0.9411       545

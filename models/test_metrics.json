@@ -1,0 +1,10 @@
+{
+    "selected_model": "Fine-Tuned MobileNetV2",
+    "test_loss": 0.23543795943260193,
+    "test_accuracy": 0.9412844036697248,
+    "weighted_precision": 0.9412207723137122,
+    "weighted_recall": 0.9412844036697248,
+    "weighted_f1": 0.9410621912794392,
+    "macro_f1": 0.9588972131413699,
+    "probability_mse": 0.013813096340768136
+}

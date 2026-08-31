@@ -1,0 +1,118 @@
+{
+  "runtime": "tf.lite.Interpreter",
+  "tensorflow_version": "2.21.0",
+  "num_threads": 1,
+  "delegate_configuration": "Default TensorFlow Lite delegates enabled; XNNPACK is selected by the runtime when supported. No explicit delegate was loaded.",
+  "explicit_delegate_objects": [],
+  "input": {
+    "name": "serving_default_rgb_image:0",
+    "index": 0,
+    "shape": [
+      1,
+      224,
+      224,
+      3
+    ],
+    "shape_signature": [
+      -1,
+      224,
+      224,
+      3
+    ],
+    "dtype": "<class 'numpy.float32'>",
+    "quantization": [
+      0.0,
+      0
+    ],
+    "quantization_parameters": {
+      "scales": [],
+      "zero_points": [],
+      "quantized_dimension": 0,
+      "block_size": 0
+    },
+    "sparsity_parameters": {}
+  },
+  "output": {
+    "name": "StatefulPartitionedCall_1:0",
+    "index": 385,
+    "shape": [
+      1,
+      7
+    ],
+    "shape_signature": [
+      -1,
+      7
+    ],
+    "dtype": "<class 'numpy.float32'>",
+    "quantization": [
+      0.0,
+      0
+    ],
+    "quantization_parameters": {
+      "scales": [],
+      "zero_points": [],
+      "quantized_dimension": 0,
+      "block_size": 0
+    },
+    "sparsity_parameters": {}
+  },
+  "float32_baseline_interface": {
+    "runtime": "tf.lite.Interpreter",
+    "tensorflow_version": "2.21.0",
+    "num_threads": 1,
+    "delegate_configuration": "Default TensorFlow Lite delegates enabled; XNNPACK is selected by the runtime when supported. No explicit delegate was loaded.",
+    "explicit_delegate_objects": [],
+    "input": {
+      "name": "serving_default_rgb_image:0",
+      "index": 0,
+      "shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "shape_signature": [
+        -1,
+        224,
+        224,
+        3
+      ],
+      "dtype": "<class 'numpy.float32'>",
+      "quantization": [
+        0.0,
+        0
+      ],
+      "quantization_parameters": {
+        "scales": [],
+        "zero_points": [],
+        "quantized_dimension": 0,
+        "block_size": 0
+      },
+      "sparsity_parameters": {}
+    },
+    "output": {
+      "name": "StatefulPartitionedCall_1:0",
+      "index": 254,
+      "shape": [
+        1,
+        7
+      ],
+      "shape_signature": [
+        -1,
+        7
+      ],
+      "dtype": "<class 'numpy.float32'>",
+      "quantization": [
+        0.0,
+        0
+      ],
+      "quantization_parameters": {
+        "scales": [],
+        "zero_points": [],
+        "quantized_dimension": 0,
+        "block_size": 0
+      },
+      "sparsity_parameters": {}
+    }
+  }
+}

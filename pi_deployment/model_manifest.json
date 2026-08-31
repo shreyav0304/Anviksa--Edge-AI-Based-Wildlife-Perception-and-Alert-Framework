@@ -1,0 +1,53 @@
+{
+  "architecture": "MobileNetV3 Large",
+  "class_order": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "preprocessing": {
+    "color": "RGB",
+    "resize": [224, 224],
+    "interpolation": "nearest-neighbor",
+    "external_dtype": "float32",
+    "external_range": "approximately [0,255]",
+    "batch_dimension": true,
+    "external_normalization": "none",
+    "embedded_normalization": "MobileNetV3 Rescaling(scale=1/127.5, offset=-1.0)"
+  },
+  "models": [
+    {
+      "representation": "Float32 TFLite",
+      "original_filename": "mobilenet_v3_large_float32.tflite",
+      "package_path": "models/mobilenet_v3_large_float32.tflite",
+      "sha256": "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
+      "file_size_bytes": 12920548,
+      "input_shape": [1, 224, 224, 3],
+      "input_dtype": "float32",
+      "output_shape": [1, 7],
+      "output_dtype": "float32",
+      "validation_accuracy": 0.9541284403669725,
+      "venomous_snake_recall": 0.9290780141843972,
+      "snake_macro_recall": 0.9215702570921986
+    },
+    {
+      "representation": "Float16 TFLite",
+      "original_filename": "mobilenet_v3_large_float16.tflite",
+      "package_path": "models/mobilenet_v3_large_float16.tflite",
+      "sha256": "5b9e7763e605c7e5f8081dcf12c2ff6afd1cb1d7cd0f6f3cda909e07d1e7c4e5",
+      "file_size_bytes": 6549452,
+      "input_shape": [1, 224, 224, 3],
+      "input_dtype": "float32",
+      "output_shape": [1, 7],
+      "output_dtype": "float32",
+      "validation_accuracy": 0.9541284403669725,
+      "venomous_snake_recall": 0.9290780141843972,
+      "snake_macro_recall": 0.9215702570921986
+    }
+  ],
+  "raspberry_pi_benchmark_status": "NOT YET PERFORMED"
+}

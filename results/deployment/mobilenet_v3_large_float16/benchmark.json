@@ -1,0 +1,16 @@
+{
+  "benchmark_type": "model-only TFLite interpreter latency; resizing/RGB decoding excluded",
+  "platform": "Windows CPU",
+  "interpreter": "tf.lite.Interpreter with default XNNPACK delegate",
+  "num_threads": 1,
+  "batch_size": 1,
+  "warmup_iterations": 10,
+  "timed_iterations": 100,
+  "representative_input": "first frozen-test image, identical method to Float32 benchmark",
+  "average_inference_time_ms": 7.656459999852814,
+  "median_inference_time_ms": 7.502749998820946,
+  "minimum_inference_time_ms": 6.586999981664121,
+  "maximum_inference_time_ms": 12.280599999940023,
+  "standard_deviation_ms": 0.9999743162044671,
+  "approximate_fps": 130.60866249144172
+}

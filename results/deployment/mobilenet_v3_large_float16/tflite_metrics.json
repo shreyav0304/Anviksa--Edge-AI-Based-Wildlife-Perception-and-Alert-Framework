@@ -1,0 +1,91 @@
+{
+  "test_accuracy": 0.9541284403669725,
+  "macro_precision": 0.9688672743760461,
+  "macro_recall": 0.9686971396837043,
+  "macro_f1": 0.9687245232484056,
+  "weighted_precision": 0.9541425156407934,
+  "weighted_recall": 0.9541284403669725,
+  "weighted_f1": 0.9540628864020689,
+  "per_class": [
+    {
+      "class": "Cow",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 39
+    },
+    {
+      "class": "Deer",
+      "precision": 0.9722222222222222,
+      "recall": 0.9722222222222222,
+      "f1": 0.9722222222222222,
+      "support": 72
+    },
+    {
+      "class": "Elephant",
+      "precision": 0.9753086419753086,
+      "recall": 1.0,
+      "f1": 0.9875,
+      "support": 79
+    },
+    {
+      "class": "Monkey",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 28
+    },
+    {
+      "class": "Non_Venomous_Snake",
+      "precision": 0.936,
+      "recall": 0.9140625,
+      "f1": 0.924901185770751,
+      "support": 128
+    },
+    {
+      "class": "Venomous_Snake",
+      "precision": 0.916083916083916,
+      "recall": 0.9290780141843972,
+      "f1": 0.9225352112676056,
+      "support": 141
+    },
+    {
+      "class": "Wild_Boar",
+      "precision": 0.9824561403508771,
+      "recall": 0.9655172413793104,
+      "f1": 0.9739130434782609,
+      "support": 58
+    }
+  ],
+  "venomous_snake": {
+    "class": "Venomous_Snake",
+    "precision": 0.916083916083916,
+    "recall": 0.9290780141843972,
+    "f1": 0.9225352112676056,
+    "support": 141
+  },
+  "non_venomous_snake": {
+    "class": "Non_Venomous_Snake",
+    "precision": 0.936,
+    "recall": 0.9140625,
+    "f1": 0.924901185770751,
+    "support": 128
+  },
+  "snake_macro_recall": 0.9215702570921986,
+  "snake_macro_f1": 0.9237181985191782,
+  "test_loss": 0.15590700507164001,
+  "dataset_fingerprint": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "total_correct": 520,
+  "total_errors": 25,
+  "snake_type_confusions": {
+    "non_venomous_as_venomous": 11,
+    "venomous_as_non_venomous": 8
+  },
+  "confusion_comparison": {
+    "versus_keras_changed_cells": 0,
+    "versus_keras_total_absolute_count_difference": 0,
+    "versus_float32_changed_cells": 0,
+    "versus_float32_total_absolute_count_difference": 0,
+    "changed_cells_versus_float32": []
+  }
+}

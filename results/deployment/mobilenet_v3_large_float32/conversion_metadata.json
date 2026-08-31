@@ -1,0 +1,30 @@
+{
+  "source_model": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results\\mobilenet_v3_large\\20260830T171150Z_94069968\\best_model.keras",
+  "source_sha256_before": "dc89f6b2c39a1206d5c27de218a1a3664a2ea986efe8c2cbddc54091a2661e14",
+  "source_sha256_after": "dc89f6b2c39a1206d5c27de218a1a3664a2ea986efe8c2cbddc54091a2661e14",
+  "source_size_bytes": 32418673,
+  "tflite_path": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results\\deployment\\mobilenet_v3_large_float32\\mobilenet_v3_large_float32.tflite",
+  "tflite_sha256": "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
+  "tflite_size_bytes": 12920548,
+  "size_reduction_bytes": 19498125,
+  "size_reduction_percent": 60.14473510374715,
+  "conversion": "standard Float32; no optimizations or quantization",
+  "class_order": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "external_preprocessing": "RGB resize nearest-neighbor to 224x224; cast float32; retain approximately [0,255]",
+  "embedded_preprocessing": "MobileNetV3 Rescaling(scale=1/127.5, offset=-1.0)",
+  "images_compared": 545,
+  "top1_agreement_count": 545,
+  "top1_agreement_percentage": 100.0,
+  "mean_absolute_probability_difference": 4.535150210926986e-08,
+  "maximum_observed_probability_difference": 3.516674041748047e-06,
+  "changed_top1_predictions": 0,
+  "changed_images": []
+}

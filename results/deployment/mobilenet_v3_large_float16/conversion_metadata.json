@@ -1,0 +1,82 @@
+{
+  "generated_at_utc": "2026-08-31T00:59:11.217895+00:00",
+  "environment": {
+    "generated_at_utc": "2026-08-31T00:59:11.217895+00:00",
+    "python_version": "3.11.2 (tags/v3.11.2:878ead1, Feb  7 2023, 16:38:35) [MSC v.1934 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "tensorflow_version": "2.21.0",
+    "keras_version": "3.15.1",
+    "numpy_version": "2.4.3",
+    "gpu_devices": []
+  },
+  "source_model": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results\\mobilenet_v3_large\\20260830T171150Z_94069968\\best_model.keras",
+  "source_sha256_before": "dc89f6b2c39a1206d5c27de218a1a3664a2ea986efe8c2cbddc54091a2661e14",
+  "source_sha256_after": "dc89f6b2c39a1206d5c27de218a1a3664a2ea986efe8c2cbddc54091a2661e14",
+  "float32_baseline": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results\\deployment\\mobilenet_v3_large_float32\\mobilenet_v3_large_float32.tflite",
+  "float32_sha256_before": "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
+  "float32_sha256_after": "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
+  "float16_path": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results\\deployment\\mobilenet_v3_large_float16\\mobilenet_v3_large_float16.tflite",
+  "float16_sha256": "5b9e7763e605c7e5f8081dcf12c2ff6afd1cb1d7cd0f6f3cda909e07d1e7c4e5",
+  "conversion": {
+    "source": "original selected Keras model (not the Float32 TFLite model)",
+    "optimizations": [
+      "tf.lite.Optimize.DEFAULT"
+    ],
+    "supported_types": [
+      "tf.float16"
+    ],
+    "representative_dataset": null,
+    "integer_input_output": false,
+    "training_performed": false
+  },
+  "class_order": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "dataset_fingerprint_before": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "dataset_fingerprint_after": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "test_images": 545,
+  "external_preprocessing": "RGB decode; nearest-neighbor resize to 224x224; float32; retain approximately [0,255]",
+  "embedded_preprocessing": "MobileNetV3 Rescaling(scale=1/127.5, offset=-1.0)",
+  "agreement": {
+    "keras_vs_float16_count": 545,
+    "keras_vs_float16_percentage": 100.0,
+    "keras_vs_float16_mean_absolute_probability_difference": 0.00018637192260939628,
+    "keras_vs_float16_maximum_absolute_probability_difference": 0.02302563190460205,
+    "keras_vs_float16_changed_top1_predictions": 0,
+    "float32_vs_float16_count": 545,
+    "float32_vs_float16_percentage": 100.0,
+    "float32_vs_float16_mean_absolute_probability_difference": 0.0001863563375081867,
+    "float32_vs_float16_maximum_absolute_probability_difference": 0.023023873567581177,
+    "float32_vs_float16_changed_top1_predictions": 0,
+    "all_disagreements": [],
+    "snake_related_disagreements": []
+  },
+  "storage": {
+    "keras_bytes": 32418673,
+    "keras_mib": 30.916855812072754,
+    "float32_bytes": 12920548,
+    "float32_mib": 12.32199478149414,
+    "float16_bytes": 6549452,
+    "float16_mib": 6.246044158935547,
+    "float16_reduction_vs_keras_bytes": 25869221,
+    "float16_reduction_vs_keras_percent": 79.79728534847801,
+    "float16_reduction_vs_float32_bytes": 6371096,
+    "float16_reduction_vs_float32_percent": 49.30979707671842
+  },
+  "acceptance_rule": "At most 1 Float32 top-1 change; accuracy loss <=1/545; macro-F1 loss <=0.002; no venomous-recall loss; snake-macro-recall loss <=1/256; Float16 smaller than Float32.",
+  "deployment_decision": "ACCEPTED FOR RASPBERRY PI BENCHMARKING",
+  "raspberry_pi_performance_claim": "None; device performance has not yet been measured.",
+  "integrity": {
+    "keras_unchanged": true,
+    "float32_unchanged": true,
+    "dataset_unchanged": true,
+    "no_training": true,
+    "class_order_unchanged": true
+  }
+}
