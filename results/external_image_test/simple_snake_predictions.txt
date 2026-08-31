@@ -1,0 +1,19 @@
+IMAGE | MODEL PREDICTION | CONFIDENCE | TOP-2 CLASS | TOP-2 PROBABILITY | MARGIN
+s1.jpg | Non_Venomous_Snake | 98.86% | Venomous_Snake | 1.14% | 97.73%
+s2.jpg | Non_Venomous_Snake | 99.98% | Venomous_Snake | 0.02% | 99.95%
+s3.jpg | Venomous_Snake | 96.29% | Non_Venomous_Snake | 3.71% | 92.58%
+s4.jpg | Non_Venomous_Snake | 99.93% | Venomous_Snake | 0.07% | 99.86%
+s5.jpg | Non_Venomous_Snake | 98.64% | Venomous_Snake | 1.36% | 97.29%
+s6.jpg | Venomous_Snake | 100.00% | Non_Venomous_Snake | 0.00% | 100.00%
+s7.jpeg | Venomous_Snake | 68.46% | Non_Venomous_Snake | 31.54% | 36.91%
+
+IMAGE 1: Non-Venomous
+IMAGE 2: Non-Venomous
+IMAGE 3: Venomous
+IMAGE 4: Non-Venomous
+IMAGE 5: Non-Venomous
+IMAGE 6: Venomous
+IMAGE 7: Venomous
+
+VENOMOUS PREDICTIONS: 3
+NON-VENOMOUS PREDICTIONS: 4
