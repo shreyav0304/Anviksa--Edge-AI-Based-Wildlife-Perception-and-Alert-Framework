@@ -1,11 +1,11 @@
 IMAGE | MODEL PREDICTION | CONFIDENCE | TOP-2 CLASS | TOP-2 PROBABILITY | MARGIN
-s1.jpg | Non_Venomous_Snake | 98.86% | Venomous_Snake | 1.14% | 97.73%
-s2.jpg | Non_Venomous_Snake | 99.98% | Venomous_Snake | 0.02% | 99.95%
-s3.jpg | Venomous_Snake | 96.29% | Non_Venomous_Snake | 3.71% | 92.58%
-s4.jpg | Non_Venomous_Snake | 99.93% | Venomous_Snake | 0.07% | 99.86%
-s5.jpg | Non_Venomous_Snake | 98.64% | Venomous_Snake | 1.36% | 97.29%
-s6.jpg | Venomous_Snake | 100.00% | Non_Venomous_Snake | 0.00% | 100.00%
-s7.jpeg | Venomous_Snake | 68.46% | Non_Venomous_Snake | 31.54% | 36.91%
+s1.jpg | Non_Venomous_Snake | 98.8649725914001500% | Venomous_Snake | 1.135030761361122100% | 97.7299418300390200%
+s2.jpg | Non_Venomous_Snake | 99.9773681163787800% | Venomous_Snake | 0.02255543950013816400% | 99.9548126768786500%
+s3.jpg | Venomous_Snake | 96.2903916835784900% | Non_Venomous_Snake | 3.70955951511859900% | 92.5808321684598900%
+s4.jpg | Non_Venomous_Snake | 99.9298691749572800% | Venomous_Snake | 0.0701334793120622600% | 99.8597356956452100%
+s5.jpg | Non_Venomous_Snake | 98.6424386501312300% | Venomous_Snake | 1.35693373158574100% | 97.2855049185454800%
+s6.jpg | Venomous_Snake | 99.998247623443600% | Non_Venomous_Snake | 0.0017518972526886500% | 99.9964957261909100%
+s7.jpeg | Venomous_Snake | 68.4564590454101600% | Non_Venomous_Snake | 31.5435439348220800% | 36.91291511058807400%
 
 IMAGE 1: Non-Venomous
 IMAGE 2: Non-Venomous

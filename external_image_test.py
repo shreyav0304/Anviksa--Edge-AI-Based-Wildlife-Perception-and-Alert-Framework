@@ -227,9 +227,9 @@ def main() -> None:
     for row in rows:
         status = row["confidence_level"] + (" / UNCERTAIN" if row["uncertain"] else "")
         print(
-            f"{row['filename']} | {row['predicted_class']} | {row['confidence']:.1%} | "
-            f"{row['top2_class']} {row['top2_probability']:.1%} | "
-            f"{row['top1_top2_margin']:.1%} | {status}"
+            f"{row['filename']} | {row['predicted_class']} | {row['confidence']:.15%} | "
+            f"{row['top2_class']} {row['top2_probability']:.15%} | "
+            f"{row['top1_top2_margin']:.15%} | {status}"
         )
     print()
     print(f"EXTERNAL IMAGES TESTED: {len(rows)}")

@@ -1,0 +1,4 @@
+source_id,video_title,source_url,assigned_class,reason,review_status,notes
+WEB_U001,Cobra video 2017,https://commons.wikimedia.org/wiki/File:Cobra_video_2017.webm,Unverified,SPECIES_IDENTITY_UNCLEAR,PENDING,Commons categorizes the animal only as unidentified Naja; not downloaded or labeled.
+WEB_U002,Snake video,https://commons.wikimedia.org/wiki/File:Snake_video.webm,Unverified,SPECIES_IDENTITY_UNCLEAR,PENDING,No species identification in source metadata; not downloaded or labeled.
+WEB_U003,Bobcat and rattlesnake interaction in Tucson,https://commons.wikimedia.org/wiki/File:Bobcat_and_rattlesnake_interaction_in_Tucson.webm,Unverified,SPECIES_IDENTITY_UNCLEAR,PENDING,Rattlesnake species is not established in the source title/metadata; not downloaded or labeled.

@@ -5,14 +5,41 @@ Model: pi_deployment/models/mobilenet_v3_large_float32.tflite
 Verified SHA-256: 086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7
 Preprocessing: RGB, 224x224 nearest-neighbor, float32 [0,255], batch dimension
 
+Filename: m1.jpg
+Predicted class: Monkey
+Confidence: 0.99999988 (HIGH)
+Top-3: Monkey=0.99999988, Non_Venomous_Snake=0.00000009, Elephant=0.00000001
+Top-1/Top-2 margin: 0.99999979
+Uncertain: FALSE
+Inference time: 11.183 ms
+All probabilities: Cow=0.00000000, Deer=0.00000000, Elephant=0.00000001, Monkey=0.99999988, Non_Venomous_Snake=0.00000009, Venomous_Snake=0.00000000, Wild_Boar=0.00000000
+
+Filename: p1.jpg
+Predicted class: Monkey
+Confidence: 0.99928170 (HIGH)
+Top-3: Monkey=0.99928170, Venomous_Snake=0.00054819, Elephant=0.00014810
+Top-1/Top-2 margin: 0.99873352
+Uncertain: FALSE
+Inference time: 8.578 ms
+All probabilities: Cow=0.00000445, Deer=0.00000035, Elephant=0.00014810, Monkey=0.99928170, Non_Venomous_Snake=0.00000026, Venomous_Snake=0.00054819, Wild_Boar=0.00001694
+
 Filename: s1.jpg
 Predicted class: Non_Venomous_Snake
 Confidence: 0.98864973 (HIGH)
 Top-3: Non_Venomous_Snake=0.98864973, Venomous_Snake=0.01135031, Cow=0.00000002
 Top-1/Top-2 margin: 0.97729942
 Uncertain: FALSE
-Inference time: 17.226 ms
+Inference time: 9.348 ms
 All probabilities: Cow=0.00000002, Deer=0.00000000, Elephant=0.00000000, Monkey=0.00000000, Non_Venomous_Snake=0.98864973, Venomous_Snake=0.01135031, Wild_Boar=0.00000000
+
+Filename: s10.jpg
+Predicted class: Non_Venomous_Snake
+Confidence: 0.99339795 (HIGH)
+Top-3: Non_Venomous_Snake=0.99339795, Venomous_Snake=0.00660162, Deer=0.00000039
+Top-1/Top-2 margin: 0.98679634
+Uncertain: FALSE
+Inference time: 8.652 ms
+All probabilities: Cow=0.00000001, Deer=0.00000039, Elephant=0.00000000, Monkey=0.00000004, Non_Venomous_Snake=0.99339795, Venomous_Snake=0.00660162, Wild_Boar=0.00000000
 
 Filename: s2.jpg
 Predicted class: Non_Venomous_Snake
@@ -20,7 +47,7 @@ Confidence: 0.99977368 (HIGH)
 Top-3: Non_Venomous_Snake=0.99977368, Venomous_Snake=0.00022555, Deer=0.00000044
 Top-1/Top-2 margin: 0.99954813
 Uncertain: FALSE
-Inference time: 16.441 ms
+Inference time: 7.764 ms
 All probabilities: Cow=0.00000004, Deer=0.00000044, Elephant=0.00000006, Monkey=0.00000020, Non_Venomous_Snake=0.99977368, Venomous_Snake=0.00022555, Wild_Boar=0.00000000
 
 Filename: s3.jpg
@@ -29,7 +56,7 @@ Confidence: 0.96290392 (HIGH)
 Top-3: Venomous_Snake=0.96290392, Non_Venomous_Snake=0.03709560, Deer=0.00000033
 Top-1/Top-2 margin: 0.92580832
 Uncertain: FALSE
-Inference time: 16.381 ms
+Inference time: 7.698 ms
 All probabilities: Cow=0.00000008, Deer=0.00000033, Elephant=0.00000000, Monkey=0.00000003, Non_Venomous_Snake=0.03709560, Venomous_Snake=0.96290392, Wild_Boar=0.00000011
 
 Filename: s4.jpg
@@ -38,7 +65,7 @@ Confidence: 0.99929869 (HIGH)
 Top-3: Non_Venomous_Snake=0.99929869, Venomous_Snake=0.00070133, Monkey=0.00000001
 Top-1/Top-2 margin: 0.99859736
 Uncertain: FALSE
-Inference time: 16.781 ms
+Inference time: 7.710 ms
 All probabilities: Cow=0.00000000, Deer=0.00000000, Elephant=0.00000000, Monkey=0.00000001, Non_Venomous_Snake=0.99929869, Venomous_Snake=0.00070133, Wild_Boar=0.00000000
 
 Filename: s5.jpg
@@ -47,7 +74,7 @@ Confidence: 0.98642439 (HIGH)
 Top-3: Non_Venomous_Snake=0.98642439, Venomous_Snake=0.01356934, Monkey=0.00000506
 Top-1/Top-2 margin: 0.97285505
 Uncertain: FALSE
-Inference time: 16.874 ms
+Inference time: 7.729 ms
 All probabilities: Cow=0.00000001, Deer=0.00000056, Elephant=0.00000074, Monkey=0.00000506, Non_Venomous_Snake=0.98642439, Venomous_Snake=0.01356934, Wild_Boar=0.00000002
 
 Filename: s6.jpg
@@ -56,7 +83,7 @@ Confidence: 0.99998248 (HIGH)
 Top-3: Venomous_Snake=0.99998248, Non_Venomous_Snake=0.00001752, Elephant=0.00000000
 Top-1/Top-2 margin: 0.99996496
 Uncertain: FALSE
-Inference time: 17.078 ms
+Inference time: 7.702 ms
 All probabilities: Cow=0.00000000, Deer=0.00000000, Elephant=0.00000000, Monkey=0.00000000, Non_Venomous_Snake=0.00001752, Venomous_Snake=0.99998248, Wild_Boar=0.00000000
 
 Filename: s7.jpeg
@@ -65,8 +92,26 @@ Confidence: 0.68456459 (MODERATE)
 Top-3: Venomous_Snake=0.68456459, Non_Venomous_Snake=0.31543544, Monkey=0.00000000
 Top-1/Top-2 margin: 0.36912915
 Uncertain: FALSE
-Inference time: 16.982 ms
+Inference time: 8.212 ms
 All probabilities: Cow=0.00000000, Deer=0.00000000, Elephant=0.00000000, Monkey=0.00000000, Non_Venomous_Snake=0.31543544, Venomous_Snake=0.68456459, Wild_Boar=0.00000000
+
+Filename: s8.jpg
+Predicted class: Non_Venomous_Snake
+Confidence: 0.99717474 (HIGH)
+Top-3: Non_Venomous_Snake=0.99717474, Venomous_Snake=0.00282527, Monkey=0.00000002
+Top-1/Top-2 margin: 0.99434947
+Uncertain: FALSE
+Inference time: 7.723 ms
+All probabilities: Cow=0.00000000, Deer=0.00000001, Elephant=0.00000000, Monkey=0.00000002, Non_Venomous_Snake=0.99717474, Venomous_Snake=0.00282527, Wild_Boar=0.00000000
+
+Filename: s9.jpg
+Predicted class: Non_Venomous_Snake
+Confidence: 0.92245930 (HIGH)
+Top-3: Non_Venomous_Snake=0.92245930, Venomous_Snake=0.07751780, Elephant=0.00001399
+Top-1/Top-2 margin: 0.84494150
+Uncertain: FALSE
+Inference time: 7.565 ms
+All probabilities: Cow=0.00000003, Deer=0.00000035, Elephant=0.00001399, Monkey=0.00000860, Non_Venomous_Snake=0.92245930, Venomous_Snake=0.07751780, Wild_Boar=0.00000002
 
 INTEGRITY
 Model unchanged: True
@@ -75,8 +120,8 @@ No training occurred: True
 No files added to frozen test dataset: True
 External images unchanged: True
 
-EXTERNAL IMAGES TESTED: 7
-HIGH CONFIDENCE: 6
+EXTERNAL IMAGES TESTED: 12
+HIGH CONFIDENCE: 11
 MODERATE CONFIDENCE: 1
 LOW CONFIDENCE: 0
 UNCERTAIN: 0

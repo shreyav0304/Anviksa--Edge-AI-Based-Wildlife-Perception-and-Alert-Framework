@@ -14,6 +14,94 @@
   "preprocessing": "RGB; nearest-neighbor resize to 224x224; float32; [0,255]; batch dimension; no external normalization",
   "predictions": [
     {
+      "filename": "m1.jpg",
+      "predicted_class": "Monkey",
+      "confidence": 0.9999998807907104,
+      "confidence_level": "HIGH",
+      "top1_probability": 0.9999998807907104,
+      "top2_class": "Non_Venomous_Snake",
+      "top2_probability": 8.580301624760978e-08,
+      "top3_class": "Elephant",
+      "top3_probability": 1.2809353577836191e-08,
+      "top1_top2_margin": 0.9999997949876942,
+      "uncertain": false,
+      "inference_time_ms": 11.183299997355789,
+      "probability_Cow": 1.676973317155106e-11,
+      "probability_Deer": 1.6803914926200036e-09,
+      "probability_Elephant": 1.2809353577836191e-08,
+      "probability_Monkey": 0.9999998807907104,
+      "probability_Non_Venomous_Snake": 8.580301624760978e-08,
+      "probability_Venomous_Snake": 2.9239239918155135e-09,
+      "probability_Wild_Boar": 8.559565278787318e-10,
+      "top3": [
+        {
+          "class": "Monkey",
+          "probability": 0.9999998807907104
+        },
+        {
+          "class": "Non_Venomous_Snake",
+          "probability": 8.580301624760978e-08
+        },
+        {
+          "class": "Elephant",
+          "probability": 1.2809353577836191e-08
+        }
+      ],
+      "class_probabilities": {
+        "Cow": 1.676973317155106e-11,
+        "Deer": 1.6803914926200036e-09,
+        "Elephant": 1.2809353577836191e-08,
+        "Monkey": 0.9999998807907104,
+        "Non_Venomous_Snake": 8.580301624760978e-08,
+        "Venomous_Snake": 2.9239239918155135e-09,
+        "Wild_Boar": 8.559565278787318e-10
+      }
+    },
+    {
+      "filename": "p1.jpg",
+      "predicted_class": "Monkey",
+      "confidence": 0.9992817044258118,
+      "confidence_level": "HIGH",
+      "top1_probability": 0.9992817044258118,
+      "top2_class": "Venomous_Snake",
+      "top2_probability": 0.0005481862463057041,
+      "top3_class": "Elephant",
+      "top3_probability": 0.0001480980427004397,
+      "top1_top2_margin": 0.9987335181795061,
+      "uncertain": false,
+      "inference_time_ms": 8.577900007367134,
+      "probability_Cow": 4.447288119990844e-06,
+      "probability_Deer": 3.5011206023227714e-07,
+      "probability_Elephant": 0.0001480980427004397,
+      "probability_Monkey": 0.9992817044258118,
+      "probability_Non_Venomous_Snake": 2.5687199922685977e-07,
+      "probability_Venomous_Snake": 0.0005481862463057041,
+      "probability_Wild_Boar": 1.6942523870966397e-05,
+      "top3": [
+        {
+          "class": "Monkey",
+          "probability": 0.9992817044258118
+        },
+        {
+          "class": "Venomous_Snake",
+          "probability": 0.0005481862463057041
+        },
+        {
+          "class": "Elephant",
+          "probability": 0.0001480980427004397
+        }
+      ],
+      "class_probabilities": {
+        "Cow": 4.447288119990844e-06,
+        "Deer": 3.5011206023227714e-07,
+        "Elephant": 0.0001480980427004397,
+        "Monkey": 0.9992817044258118,
+        "Non_Venomous_Snake": 2.5687199922685977e-07,
+        "Venomous_Snake": 0.0005481862463057041,
+        "Wild_Boar": 1.6942523870966397e-05
+      }
+    },
+    {
       "filename": "s1.jpg",
       "predicted_class": "Non_Venomous_Snake",
       "confidence": 0.9886497259140015,
@@ -25,7 +113,7 @@
       "top3_probability": 2.4959012634440114e-08,
       "top1_top2_margin": 0.9772994183003902,
       "uncertain": false,
-      "inference_time_ms": 17.225899995537475,
+      "inference_time_ms": 9.348199993837625,
       "probability_Cow": 2.4959012634440114e-08,
       "probability_Deer": 2.519706443493419e-09,
       "probability_Elephant": 4.593419811182997e-10,
@@ -58,6 +146,50 @@
       }
     },
     {
+      "filename": "s10.jpg",
+      "predicted_class": "Non_Venomous_Snake",
+      "confidence": 0.9933979511260986,
+      "confidence_level": "HIGH",
+      "top1_probability": 0.9933979511260986,
+      "top2_class": "Venomous_Snake",
+      "top2_probability": 0.006601615808904171,
+      "top3_class": "Deer",
+      "top3_probability": 3.9092503811843926e-07,
+      "top1_top2_margin": 0.9867963353171945,
+      "uncertain": false,
+      "inference_time_ms": 8.652099990285933,
+      "probability_Cow": 6.25467766468546e-09,
+      "probability_Deer": 3.9092503811843926e-07,
+      "probability_Elephant": 1.1351180412288997e-10,
+      "probability_Monkey": 3.806637494108145e-08,
+      "probability_Non_Venomous_Snake": 0.9933979511260986,
+      "probability_Venomous_Snake": 0.006601615808904171,
+      "probability_Wild_Boar": 1.9055361732966958e-09,
+      "top3": [
+        {
+          "class": "Non_Venomous_Snake",
+          "probability": 0.9933979511260986
+        },
+        {
+          "class": "Venomous_Snake",
+          "probability": 0.006601615808904171
+        },
+        {
+          "class": "Deer",
+          "probability": 3.9092503811843926e-07
+        }
+      ],
+      "class_probabilities": {
+        "Cow": 6.25467766468546e-09,
+        "Deer": 3.9092503811843926e-07,
+        "Elephant": 1.1351180412288997e-10,
+        "Monkey": 3.806637494108145e-08,
+        "Non_Venomous_Snake": 0.9933979511260986,
+        "Venomous_Snake": 0.006601615808904171,
+        "Wild_Boar": 1.9055361732966958e-09
+      }
+    },
+    {
       "filename": "s2.jpg",
       "predicted_class": "Non_Venomous_Snake",
       "confidence": 0.9997736811637878,
@@ -69,7 +201,7 @@
       "top3_probability": 4.3670161176123656e-07,
       "top1_top2_margin": 0.9995481267687865,
       "uncertain": false,
-      "inference_time_ms": 16.44109998596832,
+      "inference_time_ms": 7.763500005239621,
       "probability_Cow": 4.381305984679784e-08,
       "probability_Deer": 4.3670161176123656e-07,
       "probability_Elephant": 6.480858161239667e-08,
@@ -113,7 +245,7 @@
       "top3_probability": 3.267344084179058e-07,
       "top1_top2_margin": 0.9258083216845989,
       "uncertain": false,
-      "inference_time_ms": 16.381399997044355,
+      "inference_time_ms": 7.698000001255423,
       "probability_Cow": 8.343420887513275e-08,
       "probability_Deer": 3.267344084179058e-07,
       "probability_Elephant": 1.8569438209325995e-09,
@@ -157,7 +289,7 @@
       "top3_probability": 5.76114578265674e-09,
       "top1_top2_margin": 0.9985973569564521,
       "uncertain": false,
-      "inference_time_ms": 16.78060000995174,
+      "inference_time_ms": 7.710099976975471,
       "probability_Cow": 2.8537569529696327e-10,
       "probability_Deer": 7.48528072858079e-10,
       "probability_Elephant": 5.47669028183595e-11,
@@ -201,7 +333,7 @@
       "top3_probability": 5.058611804997781e-06,
       "top1_top2_margin": 0.9728550491854548,
       "uncertain": false,
-      "inference_time_ms": 16.874299995834008,
+      "inference_time_ms": 7.728600001428276,
       "probability_Cow": 1.3348761207510051e-08,
       "probability_Deer": 5.597805170509673e-07,
       "probability_Elephant": 7.43006694392534e-07,
@@ -245,7 +377,7 @@
       "top3_probability": 2.710986990450692e-10,
       "top1_top2_margin": 0.9999649572619091,
       "uncertain": false,
-      "inference_time_ms": 17.07830000668764,
+      "inference_time_ms": 7.702199975028634,
       "probability_Cow": 9.187669722243719e-12,
       "probability_Deer": 2.002533772485493e-12,
       "probability_Elephant": 2.710986990450692e-10,
@@ -289,7 +421,7 @@
       "top3_probability": 2.069999727183358e-09,
       "top1_top2_margin": 0.36912915110588074,
       "uncertain": false,
-      "inference_time_ms": 16.98240000405349,
+      "inference_time_ms": 8.211599983042106,
       "probability_Cow": 9.603152301140838e-11,
       "probability_Deer": 1.912356939470783e-09,
       "probability_Elephant": 8.690023700630434e-10,
@@ -319,6 +451,94 @@
         "Non_Venomous_Snake": 0.3154354393482208,
         "Venomous_Snake": 0.6845645904541016,
         "Wild_Boar": 1.0155694063485043e-09
+      }
+    },
+    {
+      "filename": "s8.jpg",
+      "predicted_class": "Non_Venomous_Snake",
+      "confidence": 0.9971747398376465,
+      "confidence_level": "HIGH",
+      "top1_probability": 0.9971747398376465,
+      "top2_class": "Venomous_Snake",
+      "top2_probability": 0.0028252715710550547,
+      "top3_class": "Monkey",
+      "top3_probability": 1.961996609622929e-08,
+      "top1_top2_margin": 0.9943494682665914,
+      "uncertain": false,
+      "inference_time_ms": 7.723399990936741,
+      "probability_Cow": 2.25969909450896e-09,
+      "probability_Deer": 8.161489262192845e-09,
+      "probability_Elephant": 8.954441355069065e-11,
+      "probability_Monkey": 1.961996609622929e-08,
+      "probability_Non_Venomous_Snake": 0.9971747398376465,
+      "probability_Venomous_Snake": 0.0028252715710550547,
+      "probability_Wild_Boar": 5.427106541944227e-10,
+      "top3": [
+        {
+          "class": "Non_Venomous_Snake",
+          "probability": 0.9971747398376465
+        },
+        {
+          "class": "Venomous_Snake",
+          "probability": 0.0028252715710550547
+        },
+        {
+          "class": "Monkey",
+          "probability": 1.961996609622929e-08
+        }
+      ],
+      "class_probabilities": {
+        "Cow": 2.25969909450896e-09,
+        "Deer": 8.161489262192845e-09,
+        "Elephant": 8.954441355069065e-11,
+        "Monkey": 1.961996609622929e-08,
+        "Non_Venomous_Snake": 0.9971747398376465,
+        "Venomous_Snake": 0.0028252715710550547,
+        "Wild_Boar": 5.427106541944227e-10
+      }
+    },
+    {
+      "filename": "s9.jpg",
+      "predicted_class": "Non_Venomous_Snake",
+      "confidence": 0.9224593043327332,
+      "confidence_level": "HIGH",
+      "top1_probability": 0.9224593043327332,
+      "top2_class": "Venomous_Snake",
+      "top2_probability": 0.0775178000330925,
+      "top3_class": "Elephant",
+      "top3_probability": 1.3985467376187444e-05,
+      "top1_top2_margin": 0.8449415042996407,
+      "uncertain": false,
+      "inference_time_ms": 7.564600004116073,
+      "probability_Cow": 3.233822809534104e-08,
+      "probability_Deer": 3.472568721463176e-07,
+      "probability_Elephant": 1.3985467376187444e-05,
+      "probability_Monkey": 8.597046871727798e-06,
+      "probability_Non_Venomous_Snake": 0.9224593043327332,
+      "probability_Venomous_Snake": 0.0775178000330925,
+      "probability_Wild_Boar": 1.5278441622967875e-08,
+      "top3": [
+        {
+          "class": "Non_Venomous_Snake",
+          "probability": 0.9224593043327332
+        },
+        {
+          "class": "Venomous_Snake",
+          "probability": 0.0775178000330925
+        },
+        {
+          "class": "Elephant",
+          "probability": 1.3985467376187444e-05
+        }
+      ],
+      "class_probabilities": {
+        "Cow": 3.233822809534104e-08,
+        "Deer": 3.472568721463176e-07,
+        "Elephant": 1.3985467376187444e-05,
+        "Monkey": 8.597046871727798e-06,
+        "Non_Venomous_Snake": 0.9224593043327332,
+        "Venomous_Snake": 0.0775178000330925,
+        "Wild_Boar": 1.5278441622967875e-08
       }
     }
   ],
