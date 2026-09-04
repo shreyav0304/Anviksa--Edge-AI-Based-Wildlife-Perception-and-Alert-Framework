@@ -1,0 +1,20 @@
+ANVĪKṢA AI — MULTI-MODEL COMPARISON SUMMARY
+
+Completed: Custom CNN, MobileNetV2, MobileNetV3 Large
+Incomplete / N.A.: EfficientNetB0
+
+Classification performance:
+Highest Accuracy: MobileNetV3 Large
+Highest Precision (macro): MobileNetV3 Large
+Highest Recall (macro): MobileNetV3 Large
+Highest F1 (macro): MobileNetV3 Large
+Lowest probability MSE: MobileNetV3 Large
+Highest Venomous Snake Recall: MobileNetV3 Large
+Highest Snake Macro Recall: MobileNetV3 Large
+
+Deployment efficiency (recorded historical measurements):
+Smallest model: Custom CNN
+Fastest recorded inference: Custom CNN
+
+Classification performance and deployment efficiency are separate considerations.
+EfficientNetB0 is excluded from rankings because its controlled experiment is incomplete.

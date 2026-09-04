@@ -56,6 +56,9 @@ temp/
 # Local Raspberry Pi benchmark measurements
 pi_deployment/pi_results/
 
+# Runtime detection logs and snapshots (never training data)
+results/detection_history/
+
 # Test and tooling caches
 .pytest_cache/
 .mypy_cache/
