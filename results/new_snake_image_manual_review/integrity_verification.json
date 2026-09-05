@@ -1,0 +1,12 @@
+{
+  "protected_metadata_unchanged": true,
+  "clean_fingerprint_matches": true,
+  "combined_fingerprint_matches": true,
+  "float32_tflite_matches": true,
+  "float16_tflite_matches": true,
+  "contact_sheets": 324,
+  "decision_rows": 324,
+  "blank_human_decisions": true,
+  "blank_human_notes": true,
+  "blank_final_recommended_status": true
+}

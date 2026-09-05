@@ -1,0 +1,58 @@
+{
+  "domain_shift_conclusion": "DOMAIN SHIFT: NOT PROVEN",
+  "source_groups": 134,
+  "largest_source_groups": [
+    [
+      "NEW_SOURCE_GROUP_0012",
+      2
+    ],
+    [
+      "NEW_SOURCE_GROUP_0001",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0002",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0003",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0004",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0005",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0006",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0007",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0008",
+      1
+    ],
+    [
+      "NEW_SOURCE_GROUP_0009",
+      1
+    ]
+  ],
+  "filename_extensions": {
+    ".jpg": 108,
+    ".png": 7,
+    ".jpeg": 16,
+    ".gif": 4
+  },
+  "dimensions": {
+    "unique_width_height_pairs": 107,
+    "median_width": 800.0,
+    "median_height": 551.0,
+    "median_aspect_ratio": 1.3829787234042554
+  }
+}

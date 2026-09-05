@@ -26,6 +26,7 @@ secrets.json
 combined_dataset/
 clean_dataset/
 dataset_integrity_reports/
+dataset_v2_candidate/
 
 # Training checkpoints and duplicate/legacy model files
 *.weights.h5

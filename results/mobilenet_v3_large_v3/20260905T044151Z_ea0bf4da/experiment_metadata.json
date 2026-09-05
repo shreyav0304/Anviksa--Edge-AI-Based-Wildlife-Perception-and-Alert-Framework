@@ -1,0 +1,19 @@
+{
+  "status": "COMPLETE",
+  "stage_reached": "complete",
+  "started_at_utc": "2026-09-05T04:41:51.528186+00:00",
+  "rights_status": "REVIEW REQUIRED",
+  "ended_at_utc": "2026-09-05T05:44:25.228138+00:00",
+  "selected_stage": "stage_1",
+  "stage1_best_validation_accuracy": 0.940559446811676,
+  "fine_tune_best_validation_accuracy": 0.938811182975769,
+  "fine_tuning": {
+    "fine_tune_layers": 45,
+    "trainable_backbone_layers": 36
+  },
+  "epochs_completed": 33,
+  "protected_paths_unchanged": true,
+  "tensorflow_version": "2.21.0",
+  "python_version": "3.11.2 (tags/v3.11.2:878ead1, Feb  7 2023, 16:38:35) [MSC v.1934 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.26200-SP0"
+}

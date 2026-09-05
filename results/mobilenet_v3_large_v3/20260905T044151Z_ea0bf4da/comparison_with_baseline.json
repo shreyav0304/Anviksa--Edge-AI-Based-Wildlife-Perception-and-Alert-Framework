@@ -1,0 +1,78 @@
+{
+  "baseline_experiment": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results\\mobilenet_v3_large\\20260830T171150Z_94069968",
+  "same_frozen_test": true,
+  "baseline": {
+    "test_accuracy": 0.9541284403669725,
+    "macro_precision": 0.9688672743760461,
+    "macro_recall": 0.9686971396837043,
+    "macro_f1": 0.9687245232484056,
+    "weighted_f1": 0.9540628864020689,
+    "snake_macro_recall": 0.9215702570921986,
+    "snake_macro_f1": 0.9237181985191782,
+    "venomous_snake_recall": 0.9290780141843972,
+    "non_venomous_snake_recall": 0.9140625,
+    "probability_mse": 0.0109593207,
+    "mean_confidence": 0.9682320383,
+    "median_confidence": 0.9999572039
+  },
+  "dataset_v2": {
+    "test_accuracy": 0.9467889908256881,
+    "macro_precision": 0.9608656938431857,
+    "macro_recall": 0.9639522079445124,
+    "macro_f1": 0.962328839914273,
+    "weighted_f1": 0.9466652668340616,
+    "snake_macro_recall": 0.911292109929078,
+    "snake_macro_f1": 0.914198873459372,
+    "venomous_snake_recall": 0.900709219858156,
+    "non_venomous_snake_recall": 0.921875,
+    "probability_mse": 0.011961156880965468,
+    "mean_confidence": 0.9638079404830933,
+    "median_confidence": 0.9997747540473938
+  },
+  "difference_v2_minus_baseline": {
+    "test_accuracy": -0.007339449541284404,
+    "macro_precision": -0.008001580532860486,
+    "macro_recall": -0.004744931739191882,
+    "macro_f1": -0.006395683334132651,
+    "weighted_f1": -0.00739761956800733,
+    "snake_macro_recall": -0.010278147163120588,
+    "snake_macro_f1": -0.009519325059806238,
+    "venomous_snake_recall": -0.028368794326241176,
+    "non_venomous_snake_recall": 0.0078125,
+    "probability_mse": 0.0010018361809654673,
+    "mean_confidence": -0.00442409781690678,
+    "median_confidence": -0.0001824498526061813
+  },
+  "non_snake_class_f1_assessment": {
+    "Cow": {
+      "baseline_f1": 1.0,
+      "v2_f1": 0.9873417721518988,
+      "difference": -0.012658227848101222,
+      "status": "degraded"
+    },
+    "Deer": {
+      "baseline_f1": 0.9722222222222222,
+      "v2_f1": 0.9655172413793104,
+      "difference": -0.006704980842911823,
+      "status": "degraded"
+    },
+    "Elephant": {
+      "baseline_f1": 0.9875,
+      "v2_f1": 0.9811320754716981,
+      "difference": -0.006367924528301927,
+      "status": "degraded"
+    },
+    "Monkey": {
+      "baseline_f1": 1.0,
+      "v2_f1": 1.0,
+      "difference": 0.0,
+      "status": "unchanged"
+    },
+    "Wild_Boar": {
+      "baseline_f1": 0.9739130434782609,
+      "v2_f1": 0.9739130434782609,
+      "difference": 0.0,
+      "status": "unchanged"
+    }
+  }
+}

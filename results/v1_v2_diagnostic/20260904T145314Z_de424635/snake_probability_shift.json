@@ -1,0 +1,34 @@
+{
+  "unchanged_tolerance": 1e-06,
+  "all_actual_snakes": {
+    "v1_mean_venomous_probability": 0.537541263340904,
+    "v1_median_venomous_probability": 0.6923288702964783,
+    "v2_mean_venomous_probability": 0.5811498498153334,
+    "v2_median_venomous_probability": 0.7863964438438416,
+    "mean_shift": 0.043608586474429306,
+    "median_shift": 0.0007094144821166992,
+    "minimum_shift": -0.7560460083186626,
+    "maximum_shift": 0.6786023527383804,
+    "toward_venomous": 179,
+    "toward_non_venomous": 75,
+    "effectively_unchanged": 15
+  },
+  "actual_venomous": {
+    "count": 141,
+    "v1_mean": 0.9076970714662085,
+    "v1_median": 0.9984764456748962,
+    "v2_mean": 0.924813593255607,
+    "v2_median": 0.9991161227226257,
+    "mean_shift": 0.017116521789398414,
+    "median_shift": 5.14984130859375e-05
+  },
+  "actual_non_venomous": {
+    "count": 128,
+    "v1_mean": 0.12979150595287337,
+    "v1_median": 0.01330070523545146,
+    "v2_mean": 0.202582757431907,
+    "v2_median": 0.07584941387176514,
+    "mean_shift": 0.07279125147903365,
+    "median_shift": 0.014049688063096255
+  }
+}

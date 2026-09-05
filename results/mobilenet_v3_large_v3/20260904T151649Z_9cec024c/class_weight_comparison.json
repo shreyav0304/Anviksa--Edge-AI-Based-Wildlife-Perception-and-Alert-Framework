@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "class_order": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "weights": {
+    "Cow": {
+      "v1_weight_used_by_v3": 1.6776672694394212,
+      "v2_recalculated_weight": 1.7264918625678118,
+      "difference_v3_minus_v2": -0.0488245931283906
+    },
+    "Deer": {
+      "v1_weight_used_by_v3": 0.9156180606957809,
+      "v2_recalculated_weight": 0.9422649888971133,
+      "difference_v3_minus_v2": -0.02664692820133241
+    },
+    "Elephant": {
+      "v1_weight_used_by_v3": 0.8309449171518137,
+      "v2_recalculated_weight": 0.8551276309896999,
+      "difference_v3_minus_v2": -0.02418271383788617
+    },
+    "Monkey": {
+      "v1_weight_used_by_v3": 2.3354310887350533,
+      "v2_recalculated_weight": 2.4033983637507865,
+      "difference_v3_minus_v2": -0.06796727501573319
+    },
+    "Non_Venomous_Snake": {
+      "v1_weight_used_by_v3": 0.8865265169612996,
+      "v2_recalculated_weight": 0.8228829993535876,
+      "difference_v3_minus_v2": 0.06364351760771203
+    },
+    "Venomous_Snake": {
+      "v1_weight_used_by_v3": 0.5963361722641812,
+      "v2_recalculated_weight": 0.5853770692826487,
+      "difference_v3_minus_v2": 0.010959102981532576
+    },
+    "Wild_Boar": {
+      "v1_weight_used_by_v3": 1.1425492610837438,
+      "v2_recalculated_weight": 1.1758004926108374,
+      "difference_v3_minus_v2": -0.03325123152709364
+    }
+  }
+}

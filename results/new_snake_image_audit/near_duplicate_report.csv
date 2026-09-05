@@ -1,0 +1,6 @@
+﻿first_path,second_path,first_parent,second_parent,first_species,second_species,phash_distance,dhash_distance,classification,cross_species,cross_parent_class
+Venomous/Monocled Cobra/3f7b41317b2248121c9fa4fbbff48074--cobra-snake-slytherin.jpg,Venomous/Spectacled Cobra/tumblr_o07hjtgxd71r6bovho1_500.jpg,Venomous,Venomous,Monocled Cobra,Spectacled Cobra,0,0,HIGH_CONFIDENCE_NEAR_DUPLICATE,True,False
+Venomous/Russell's Viper/Russel Viper 04.jpg,Venomous/Saw-scaled Viper/Saw-Scaled-Viper_008.jpg,Venomous,Venomous,Russell's Viper,Saw-scaled Viper,0,0,HIGH_CONFIDENCE_NEAR_DUPLICATE,True,False
+Non-Venomous/Banded Racer/9678299431_e1027b9b6c_b.jpg,Non-Venomous/Banded Racer/9678299431_e1027b9b6c_m.jpg,Non-Venomous,Non-Venomous,Banded Racer,Banded Racer,0,1,HIGH_CONFIDENCE_NEAR_DUPLICATE,False,False
+Venomous/Common Krait/02tvCommon_Krait__S_824501g.jpg,Venomous/Common Krait/7_jpegadad01e83bb98b57c221716c10d9414b.jpeg,Venomous,Venomous,Common Krait,Common Krait,0,1,HIGH_CONFIDENCE_NEAR_DUPLICATE,False,False
+Venomous/Common Krait/common krait.png,Venomous/Common Krait/KRAIT2_H.JPG,Venomous,Venomous,Common Krait,Common Krait,0,1,HIGH_CONFIDENCE_NEAR_DUPLICATE,False,False

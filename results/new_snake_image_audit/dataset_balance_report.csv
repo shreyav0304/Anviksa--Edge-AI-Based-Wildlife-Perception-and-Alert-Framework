@@ -1,0 +1,11 @@
+﻿metric,value
+Non-Venomous images,629
+Venomous images,1150
+Non-Venomous percentage,35.357
+Venomous percentage,64.643
+largest species,Spectacled Cobra
+largest species count,254
+smallest species,Green Tree Vine
+smallest species count,22
+max/min species ratio,11.5455
+parent-class imbalance ratio,1.8283

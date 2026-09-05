@@ -1,0 +1,19 @@
+{
+  "original_v1_modified": false,
+  "v2_modified": false,
+  "existing_tflite_modified": false,
+  "dataset_v2_modified": false,
+  "frozen_test_modified": false,
+  "ui_modified": false,
+  "video_data_modified": false,
+  "video_training_performed": false,
+  "audio_training_performed": false,
+  "dataset_fingerprint": "9dd48f6a1aeb8afad1f76d943b7baf36a58c837e50b7124cacb3f5211e580f23",
+  "training_process_protected_paths_unchanged": true,
+  "hashes": {
+    "v1_model": "dc89f6b2c39a1206d5c27de218a1a3664a2ea986efe8c2cbddc54091a2661e14",
+    "v2_model": "fa923197bb4475e6a51669d0ff847fa838fdd5c66f014ebf5dcc847d9afbd779",
+    "float32_tflite": "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
+    "float16_tflite": "5b9e7763e605c7e5f8081dcf12c2ff6afd1cb1d7cd0f6f3cda909e07d1e7c4e5"
+  }
+}

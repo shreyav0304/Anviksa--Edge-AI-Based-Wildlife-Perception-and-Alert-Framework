@@ -1,0 +1,16 @@
+﻿setting,v1,v2,status
+architecture,"""MobileNetV3 Large""","""MobileNetV3 Large""",MATCH
+ImageNet initialization,"""ImageNet""","""ImageNet (fresh)""",MATCH
+input size,"[224, 224]","[224, 224]",MATCH
+augmentation,"{""brightness_factor"": 0.1, ""contrast_factor"": 0.1, ""horizontal_flip"": true, ""rotation_factor"": 0.055, ""translation_height"": 0.1, ""translation_width"": 0.1, ""zoom_factor"": 0.15}","{""brightness_factor"": 0.1, ""contrast_factor"": 0.1, ""horizontal_flip"": true, ""rotation_factor"": 0.055, ""translation_height"": 0.1, ""translation_width"": 0.1, ""zoom_factor"": 0.15}",MATCH
+batch size,32,32,MATCH
+optimizer,"""Adam""","""Adam""",MATCH
+Stage 1 learning rate,0.001,0.001,MATCH
+Stage 2 learning rate,1e-05,1e-05,MATCH
+fine-tune layers,45,45,MATCH
+BatchNorm frozen,true,true,MATCH
+early stopping patience,6,6,MATCH
+ReduceLROnPlateau patience,3,3,MATCH
+ReduceLROnPlateau factor,0.5,0.5,MATCH
+seed,42,42,MATCH
+epoch limits,"[30, 25]","[30, 25]",MATCH

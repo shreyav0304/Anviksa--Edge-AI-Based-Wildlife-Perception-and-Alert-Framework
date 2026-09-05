@@ -1,0 +1,10 @@
+{
+  "protected_metadata_unchanged": true,
+  "clean_fingerprint_matches": true,
+  "combined_fingerprint_matches": true,
+  "float32_tflite_matches": true,
+  "float16_tflite_matches": true,
+  "source_images_checked": 1779,
+  "source_image_hash_mismatches": 0,
+  "source_image_metadata_unchanged": true
+}

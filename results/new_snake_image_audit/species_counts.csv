@@ -1,0 +1,14 @@
+﻿parent_label,species_label,image_count,expected,biological_verification
+Non-Venomous,Banded Racer,36,True,NOT VERIFIED
+Non-Venomous,Checkered Keelback,154,True,NOT VERIFIED
+Non-Venomous,Common Rat Snake,149,True,NOT VERIFIED
+Non-Venomous,Common Sand Boa,69,True,NOT VERIFIED
+Non-Venomous,Common Trinket,53,True,NOT VERIFIED
+Non-Venomous,Green Tree Vine,22,True,NOT VERIFIED
+Non-Venomous,Indian Rock Python,146,True,NOT VERIFIED
+Venomous,Common Krait,130,True,NOT VERIFIED
+Venomous,King Cobra,139,True,NOT VERIFIED
+Venomous,Monocled Cobra,153,True,NOT VERIFIED
+Venomous,Russell's Viper,234,True,NOT VERIFIED
+Venomous,Saw-scaled Viper,240,True,NOT VERIFIED
+Venomous,Spectacled Cobra,254,True,NOT VERIFIED

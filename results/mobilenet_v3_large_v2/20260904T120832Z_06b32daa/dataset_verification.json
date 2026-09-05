@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "dataset_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\dataset_v2_candidate",
+  "fingerprint": "9dd48f6a1aeb8afad1f76d943b7baf36a58c837e50b7124cacb3f5211e580f23",
+  "expected_fingerprint": "9dd48f6a1aeb8afad1f76d943b7baf36a58c837e50b7124cacb3f5211e580f23",
+  "class_order": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "split_counts": {
+    "train": 3819,
+    "validation": 572,
+    "test": 545
+  },
+  "total_images": 4936,
+  "new_images": 135,
+  "new_test_images": 0,
+  "all_files_present": true,
+  "all_files_readable": true,
+  "all_hashes_match": true,
+  "exact_cross_split_duplicate_groups": {},
+  "historical_frozen_test_unchanged": true,
+  "recorded_v2_validation": {
+    "original_images_copied": 4801,
+    "new_images_copied": 135,
+    "missing_manifest_files": [],
+    "corrupt_images": [],
+    "hash_mismatches": [],
+    "duplicate_destination_files": 0,
+    "exact_cross_split_duplicate_groups": [],
+    "new_source_group_split_leakage": {},
+    "new_exact_frozen_test_matches": [],
+    "new_perceptual_frozen_test_candidates": [],
+    "historical_test_count": 545,
+    "dataset_v2_test_count": 545,
+    "test_count_match": true,
+    "test_file_hash_match": true,
+    "test_manifest_order_match": true,
+    "test_manifest_copy_match": true,
+    "protected_metadata_unchanged": true,
+    "clean_fingerprint_matches": true,
+    "combined_fingerprint_matches": true,
+    "float32_tflite_matches": true,
+    "float16_tflite_matches": true
+  },
+  "rights_status": "REVIEW REQUIRED",
+  "errors": []
+}

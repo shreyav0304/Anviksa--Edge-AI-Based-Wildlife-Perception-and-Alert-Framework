@@ -1,0 +1,23 @@
+{
+  "all_actual_snakes": {
+    "count": 269,
+    "v3_minus_v1_mean": -0.033201515104625275,
+    "v3_minus_v1_median": -0.0006674738542642444,
+    "v3_minus_v2_mean": -0.07681010157905457,
+    "v3_minus_v2_median": -0.01078498363494873
+  },
+  "actual_venomous": {
+    "count": 141,
+    "v3_minus_v1_mean": -0.04182425470682561,
+    "v3_minus_v1_median": -0.003256559371948242,
+    "v3_minus_v2_mean": -0.05894077649622403,
+    "v3_minus_v2_median": -0.005727827548980713
+  },
+  "actual_non_venomous": {
+    "count": 128,
+    "v3_minus_v1_mean": -0.023703028511576463,
+    "v3_minus_v1_median": 0.00033117270868388005,
+    "v3_minus_v2_mean": -0.09649427999061011,
+    "v3_minus_v2_median": -0.020108813419938087
+  }
+}

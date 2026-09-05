@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "input_shape": [
+    null,
+    224,
+    224,
+    3
+  ],
+  "output_shape": [
+    null,
+    7
+  ],
+  "probabilities_finite": true,
+  "probability_sums_valid": true
+}

@@ -1,0 +1,19 @@
+﻿level,label,projected_count
+PARENT,Non-Venomous,180
+PARENT,Venomous,269
+SPECIES,Banded Racer,6
+SPECIES,Checkered Keelback,52
+SPECIES,Common Krait,47
+SPECIES,Common Rat Snake,32
+SPECIES,Common Sand Boa,15
+SPECIES,Common Trinket,21
+SPECIES,Green Tree Vine,8
+SPECIES,Indian Rock Python,46
+SPECIES,King Cobra,37
+SPECIES,Monocled Cobra,23
+SPECIES,Russell's Viper,43
+SPECIES,Saw-scaled Viper,59
+SPECIES,Spectacled Cobra,60
+METRIC,Venomous percentage,59.911
+METRIC,Non-Venomous percentage,40.089
+METRIC,Parent imbalance ratio,1.4944

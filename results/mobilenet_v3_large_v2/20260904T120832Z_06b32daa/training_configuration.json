@@ -1,0 +1,46 @@
+{
+  "model_key": "mobilenet_v3_large",
+  "dataset_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\dataset_v2_candidate",
+  "metadata_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\dataset_v2_candidate\\metadata",
+  "results_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results",
+  "image_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "seed": 42,
+  "initial_epochs": 30,
+  "fine_tune_epochs": 25,
+  "initial_learning_rate": 0.001,
+  "fine_tune_learning_rate": 1e-05,
+  "early_stopping_patience": 6,
+  "reduce_lr_patience": 3,
+  "reduce_lr_factor": 0.5,
+  "class_names": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "dataset_fingerprint": "9dd48f6a1aeb8afad1f76d943b7baf36a58c837e50b7124cacb3f5211e580f23",
+  "augmentation": {
+    "horizontal_flip": true,
+    "rotation_factor": 0.055,
+    "translation_height": 0.1,
+    "translation_width": 0.1,
+    "zoom_factor": 0.15,
+    "contrast_factor": 0.1,
+    "brightness_factor": 0.1
+  },
+  "experiment_model_key": "mobilenet_v3_large_v2",
+  "starting_weights": "ImageNet (fresh; no historical checkpoint loaded)",
+  "optimizer": "Adam",
+  "loss": "categorical_crossentropy",
+  "checkpoint_monitor": "val_accuracy",
+  "selection_policy": "higher best validation accuracy across stage 1 and fine-tuning",
+  "frozen_test_policy": "not constructed or accessed until selected saved model validation passes",
+  "batch_size_rationale": "32 is the proven original controlled V1 setting on this CPU environment"
+}

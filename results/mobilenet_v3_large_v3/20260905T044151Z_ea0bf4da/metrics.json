@@ -1,0 +1,88 @@
+{
+  "model_name": "MobileNetV3 Large Dataset V3",
+  "dataset_fingerprint": "9dd48f6a1aeb8afad1f76d943b7baf36a58c837e50b7124cacb3f5211e580f23",
+  "test_images": 545,
+  "test_loss": 0.16481977701187134,
+  "test_accuracy": 0.9467889908256881,
+  "macro_precision": 0.9608656938431857,
+  "macro_recall": 0.9639522079445124,
+  "macro_f1": 0.962328839914273,
+  "weighted_precision": 0.9467269662613899,
+  "weighted_recall": 0.9467889908256881,
+  "weighted_f1": 0.9466652668340616,
+  "mean_confidence": 0.9638079404830933,
+  "median_confidence": 0.9997747540473938,
+  "probability_mse": 0.011961156880965468,
+  "venomous_snake": {
+    "class": "Venomous_Snake",
+    "precision": 0.927007299270073,
+    "recall": 0.900709219858156,
+    "f1": 0.9136690647482014,
+    "support": 141
+  },
+  "non_venomous_snake": {
+    "class": "Non_Venomous_Snake",
+    "precision": 0.9076923076923077,
+    "recall": 0.921875,
+    "f1": 0.9147286821705426,
+    "support": 128
+  },
+  "snake_macro_precision": 0.9173498034811903,
+  "snake_macro_recall": 0.911292109929078,
+  "snake_macro_f1": 0.914198873459372,
+  "venomous_as_non_venomous": 11,
+  "non_venomous_as_venomous": 10,
+  "per_class": [
+    {
+      "class": "Cow",
+      "precision": 0.975,
+      "recall": 1.0,
+      "f1": 0.9873417721518988,
+      "support": 39
+    },
+    {
+      "class": "Deer",
+      "precision": 0.958904109589041,
+      "recall": 0.9722222222222222,
+      "f1": 0.9655172413793104,
+      "support": 72
+    },
+    {
+      "class": "Elephant",
+      "precision": 0.975,
+      "recall": 0.9873417721518988,
+      "f1": 0.9811320754716981,
+      "support": 79
+    },
+    {
+      "class": "Monkey",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 28
+    },
+    {
+      "class": "Non_Venomous_Snake",
+      "precision": 0.9076923076923077,
+      "recall": 0.921875,
+      "f1": 0.9147286821705426,
+      "support": 128
+    },
+    {
+      "class": "Venomous_Snake",
+      "precision": 0.927007299270073,
+      "recall": 0.900709219858156,
+      "f1": 0.9136690647482014,
+      "support": 141
+    },
+    {
+      "class": "Wild_Boar",
+      "precision": 0.9824561403508771,
+      "recall": 0.9655172413793104,
+      "f1": 0.9739130434782609,
+      "support": 58
+    }
+  ],
+  "total_parameters": 3244167,
+  "saved_model_size_bytes": 32418673
+}

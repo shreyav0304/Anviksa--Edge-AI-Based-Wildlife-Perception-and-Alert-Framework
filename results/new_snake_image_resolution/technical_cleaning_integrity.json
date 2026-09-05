@@ -1,0 +1,13 @@
+{
+  "protected_metadata_unchanged": true,
+  "clean_fingerprint": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "clean_matches": true,
+  "combined_fingerprint": "502af418ea92ba2a40190208c809180d4ba73ec2597c124bcba5cd6f11a28641",
+  "combined_matches": true,
+  "float32_sha256": "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
+  "float32_matches": true,
+  "float16_sha256": "5b9e7763e605c7e5f8081dcf12c2ff6afd1cb1d7cd0f6f3cda909e07d1e7c4e5",
+  "float16_matches": true,
+  "source_images_checked": 1779,
+  "source_image_hash_mismatches": 0
+}

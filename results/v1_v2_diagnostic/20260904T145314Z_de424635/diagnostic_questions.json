@@ -1,0 +1,31 @@
+{
+  "Q1_predictions_changed": 14,
+  "Q2_v1_correct_v2_wrong": 10,
+  "Q3_v1_wrong_v2_correct": 4,
+  "Q4_net_correction": -6,
+  "Q5_nonvenomous_correct_to_venomous": 8,
+  "Q6_venomous_errors_corrected": 4,
+  "Q7_systematic_shift_toward_venomous": true,
+  "Q8_new_snake_error_confidence": {
+    "LOW": 5,
+    "MODERATE": 3,
+    "HIGH": 2,
+    "uncertain": 5
+  },
+  "Q9_dominant_species": {
+    "Non-Venomous": [
+      "Checkered Keelback",
+      21
+    ],
+    "Venomous": [
+      "Common Krait",
+      21
+    ]
+  },
+  "Q10_balance_improved_numerically": "YES; the train nonvenomous:venomous ratio moved closer to 1",
+  "Q11_class_weights_changed": "YES",
+  "Q12_stage2_beat_stage1": "NO",
+  "Q13_overfitting_evidence": "POSSIBLE",
+  "Q14_configuration_comparability": "HIGH",
+  "Q15_strongest_explanation": "The clearest measured mechanism is a decision-boundary/probability shift toward Venomous on actual Non-Venomous test images, coinciding with changed snake class frequencies and class weights. This explains the prediction pattern but does not prove which property of the added species/source domains caused it; domain shift is not proven."
+}

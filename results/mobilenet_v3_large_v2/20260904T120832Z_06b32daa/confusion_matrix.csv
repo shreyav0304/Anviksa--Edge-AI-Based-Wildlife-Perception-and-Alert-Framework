@@ -1,0 +1,8 @@
+actual\predicted,Cow,Deer,Elephant,Monkey,Non_Venomous_Snake,Venomous_Snake,Wild_Boar
+Cow,39,0,0,0,0,0,0
+Deer,0,70,0,0,0,1,1
+Elephant,0,0,79,0,0,0,0
+Monkey,0,0,0,28,0,0,0
+Non_Venomous_Snake,0,0,0,0,109,19,0
+Venomous_Snake,0,3,0,0,5,133,0
+Wild_Boar,0,0,2,0,0,0,56

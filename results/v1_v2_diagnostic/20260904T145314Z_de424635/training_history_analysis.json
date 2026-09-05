@@ -1,0 +1,11 @@
+{
+  "best_stage1_epoch": 13,
+  "best_stage1_validation_accuracy": 0.940559446811676,
+  "best_stage2_epoch": 7,
+  "best_stage2_validation_accuracy": 0.9335664510726929,
+  "stage2_beat_stage1": false,
+  "best_stage2_validation_loss": 0.14789222180843353,
+  "stage2_validation_loss_improved_vs_first_epoch": true,
+  "training_accuracy_increased_stage2": true,
+  "overfitting_evidence": "POSSIBLE"
+}

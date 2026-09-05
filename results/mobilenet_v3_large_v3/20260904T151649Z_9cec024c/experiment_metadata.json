@@ -1,0 +1,11 @@
+{
+  "status": "INCOMPLETE_SESSION_INTERRUPTION",
+  "stage_reached": "fine_tuning",
+  "started_at_utc": "2026-09-04T15:16:49.367683+00:00",
+  "rights_status": "REVIEW REQUIRED",
+  "ended_at_utc": "2026-09-04T15:55:24.605001+00:00",
+  "last_completed_stage1_epoch": 20,
+  "last_completed_fine_tuning_epoch": 5,
+  "frozen_test_evaluated": false,
+  "reason": "Execution session ended before checkpoint selection; exact optimizer and callback state could not be recovered, so the run was not resumed."
+}

@@ -1,0 +1,13 @@
+{
+  "restored_nonvenomous_recall_vs_v2": true,
+  "retained_v2_venomous_recall_improvement": false,
+  "exceeded_v1_snake_macro_recall": false,
+  "exceeded_v1_snake_macro_f1": false,
+  "exceeded_v1_accuracy": false,
+  "reduced_nonvenomous_to_venomous_vs_v2": true,
+  "reversed_venomous_probability_shift_vs_v2": true,
+  "stage2_beat_stage1": false,
+  "better_snake_balance_than_v2": true,
+  "sufficiently_better_than_v1_for_deployment_consideration": false,
+  "class_weight_hypothesis": "MIXED"
+}
