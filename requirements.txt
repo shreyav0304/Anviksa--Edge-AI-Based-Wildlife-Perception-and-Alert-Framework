@@ -1,0 +1,14 @@
+# Raspberry Pi OS Bookworm 64-bit / CPython 3.11; see docs/raspberry_pi_setup.md.
+# Core numerical/image processing: NumPy 1.x ABI for tflite-runtime 2.14.
+numpy>=1.23.5,<2
+Pillow>=9.1
+
+# Computer vision: Tkinter displays frames; OpenCV HighGUI is unused.
+# OpenCV 4.12+ requires NumPy 2 on this Python version.
+opencv-python-headless>=4.8,<4.12
+
+# UI visualization
+matplotlib>=3.6
+
+# Lightweight TFLite inference (matching ARM64 CPython 3.11 wheel).
+tflite-runtime>=2.14,<2.15
