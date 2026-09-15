@@ -67,3 +67,10 @@ results/detection_history/
 coverage.xml
 .coverage
 htmlcov/
+
+# Local Raspberry Pi development backups
+*.bak
+*.bak2
+*.backup
+*.backup_final
+*.before_pi_fix
