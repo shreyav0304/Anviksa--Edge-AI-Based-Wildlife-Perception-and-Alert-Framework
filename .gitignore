@@ -74,3 +74,9 @@ htmlcov/
 *.backup
 *.backup_final
 *.before_pi_fix
+
+wildlife_gate/raw_non_wildlife/
+wildlife_gate/dataset/
+wildlife_gate/results/gate_v1/wildlife_gate_v1.keras
+external_test_images/s11.jpeg
+external_test_images/s12.jpeg

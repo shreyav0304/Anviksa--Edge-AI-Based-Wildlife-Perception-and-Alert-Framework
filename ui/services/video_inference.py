@@ -5,6 +5,7 @@ from __future__ import annotations
 import queue
 import threading
 import time
+import uuid
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,6 +16,10 @@ import numpy as np
 
 from pi_deployment.inference.tflite_inference import TFLiteWildlifeClassifier
 from .image_inference import ImageInferenceService, MODEL_PATH, confidence_level
+from .wildlife_gate import WildlifeGateResult, WildlifeGateService
+
+
+MAX_UNCERTAIN_FRAMES = 3
 
 
 @dataclass(frozen=True)
@@ -47,6 +52,9 @@ class VideoUpdate:
     kind: str
     frame_rgb: np.ndarray | None = None
     analysis: LiveAnalysis | None = None
+    gate: WildlifeGateResult | None = None
+    gate_timed_out: bool = False
+    episode_key: str = ""
     frames_captured: int = 0
     frames_processed: int = 0
     source_fps: float = 0.0
@@ -69,6 +77,12 @@ class TemporalAnalyzer:
         self.last_class: str | None = None
         self.stable_count = 0
         self.stable_events = 0
+
+    def reset(self) -> None:
+        """Discard previous species evidence and restart the stable-frame run."""
+        self.history.clear()
+        self.last_class = None
+        self.stable_count = 0
 
     def update(self, probabilities: np.ndarray, inference_time_ms: float) -> LiveAnalysis:
         values = np.asarray(probabilities, dtype=np.float64)
@@ -100,6 +114,36 @@ class TemporalAnalyzer:
             inference_time_ms=float(inference_time_ms),
             probabilities=tuple(float(value) for value in smoothed),
         )
+
+
+class GateTemporalState:
+    """Count selected uncertain frames while holding species state for at most three."""
+
+    def __init__(self, max_uncertain_frames: int = MAX_UNCERTAIN_FRAMES) -> None:
+        if max_uncertain_frames < 1:
+            raise ValueError("Maximum uncertain frames must be positive")
+        self.max_uncertain_frames = max_uncertain_frames
+        self.uncertain_count = 0
+
+    def observe(self, decision: str, analyzer: TemporalAnalyzer) -> tuple[bool, bool]:
+        """Return (timed_out, ended_sighting); never classify an uncertain frame."""
+        if decision == "WILDLIFE":
+            self.uncertain_count = 0
+            return False, False
+        if decision == "NON_WILDLIFE":
+            self.uncertain_count = 0
+            ended_sighting = analyzer.last_class is not None
+            analyzer.reset()
+            return False, ended_sighting
+        if decision != "UNCERTAIN":
+            raise ValueError(f"Unknown Wildlife Gate decision: {decision}")
+        self.uncertain_count += 1
+        if self.uncertain_count < self.max_uncertain_frames:
+            return False, False
+        self.uncertain_count = 0
+        ended_sighting = analyzer.last_class is not None
+        analyzer.reset()
+        return True, ended_sighting
 
 
 def inspect_video(path: Path) -> VideoSourceInfo:
@@ -175,9 +219,14 @@ class VideoInferenceWorker:
             if not capture.isOpened():
                 self._publish(VideoUpdate("error", message="Camera or video source could not be opened.")); return
             ImageInferenceService(MODEL_PATH).verify_model()
+            gate_service = WildlifeGateService(num_threads=1)
             classifier = TFLiteWildlifeClassifier(MODEL_PATH, num_threads=1)
             analyzer = TemporalAnalyzer(classifier.class_names, self.smoothing_window, self.stable_frames)
+            gate_temporal = GateTemporalState()
             frames_captured = frames_processed = 0; latency_total = 0.0
+            current_gate: WildlifeGateResult | None = None
+            current_gate_timed_out = False
+            episode_key = uuid.uuid4().hex
             source_fps = float(capture.get(cv2.CAP_PROP_FPS)); started = time.perf_counter()
             recorded = isinstance(self.source, Path)
             while not self.stop_event.is_set():
@@ -192,13 +241,25 @@ class VideoInferenceWorker:
                 frames_captured += 1
                 frame_rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
                 analysis = None
+                gate = current_gate
+                gate_timed_out = current_gate_timed_out
                 if frames_captured % self.frame_skip == 0:
-                    raw = classifier.predict(frame_rgb)
-                    raw_probabilities = np.asarray(raw["probabilities"], dtype=np.float64)
-                    analysis = analyzer.update(raw_probabilities, float(raw["inference_time_ms"]))
-                    frames_processed += 1; latency_total += analysis.inference_time_ms
+                    gate = gate_service.predict(frame_rgb)
+                    gate_timed_out, ended_sighting = gate_temporal.observe(gate.decision, analyzer)
+                    if ended_sighting:
+                        episode_key = uuid.uuid4().hex
+                    if gate.decision == "WILDLIFE":
+                        raw = classifier.predict(frame_rgb)
+                        raw_probabilities = np.asarray(raw["probabilities"], dtype=np.float64)
+                        analysis = analyzer.update(raw_probabilities, float(raw["inference_time_ms"]))
+                        inference_ms = gate.inference_time_ms + analysis.inference_time_ms
+                    else:
+                        inference_ms = gate.inference_time_ms
+                    current_gate = gate
+                    current_gate_timed_out = gate_timed_out
+                    frames_processed += 1; latency_total += inference_ms
                 elapsed = max(time.perf_counter() - started, 1e-6)
-                self._publish(VideoUpdate("frame", frame_rgb=frame_rgb, analysis=analysis, frames_captured=frames_captured, frames_processed=frames_processed, source_fps=source_fps, processed_fps=frames_processed/elapsed, average_inference_ms=latency_total/max(frames_processed,1), stable_events=analyzer.stable_events))
+                self._publish(VideoUpdate("frame", frame_rgb=frame_rgb, analysis=analysis, gate=gate, gate_timed_out=gate_timed_out, episode_key=episode_key, frames_captured=frames_captured, frames_processed=frames_processed, source_fps=source_fps, processed_fps=frames_processed/elapsed, average_inference_ms=latency_total/max(frames_processed,1), stable_events=analyzer.stable_events))
                 if recorded and source_fps > 0:
                     time.sleep(max(0.0, 1.0/source_fps - (time.perf_counter()-frame_started)))
         except Exception as exc:

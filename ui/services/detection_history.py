@@ -77,7 +77,7 @@ class DetectionHistoryService:
         self.snapshot_dir = self.root / "snapshots"
         self.cooldown_seconds = float(cooldown_seconds)
         self._lock = threading.RLock()
-        self._last_event_time: dict[tuple[str, str, str], float] = {}
+        self._last_event_time: dict[tuple[str, str, str, str | None], float] = {}
         self.malformed_rows = 0
 
     def _ensure_directories(self) -> None:
@@ -138,11 +138,15 @@ class DetectionHistoryService:
         event = self.create_event(source_type="IMAGE", source_name=str(image_path), snapshot_path=snapshot, event_id=identifier, stable=False, stable_count=0, notes="Explicitly saved image analysis", **event_values)
         return self._append(event)
 
-    def log_stable_frame(self, image: Image.Image, *, source_type: str, source_name: str, now_monotonic: float | None = None, **event_values) -> DetectionEvent | None:
+    def log_stable_frame(self, image: Image.Image, *, source_type: str, source_name: str,
+                         now_monotonic: float | None = None, episode_key: str | None = None,
+                         **event_values) -> DetectionEvent | None:
         confidence = float(event_values["confidence"])
         if not event_values["stable"] or event_values["uncertain"] or confidence < .80:
             return None
-        key = (source_type.upper(), source_name, event_values["predicted_class"])
+        # Video sightings get distinct cooldown keys after a gate rejection.
+        # Callers without an episode key retain their existing cooldown behavior.
+        key = (source_type.upper(), source_name, event_values["predicted_class"], episode_key)
         clock = time.monotonic() if now_monotonic is None else now_monotonic
         with self._lock:
             previous = self._last_event_time.get(key)

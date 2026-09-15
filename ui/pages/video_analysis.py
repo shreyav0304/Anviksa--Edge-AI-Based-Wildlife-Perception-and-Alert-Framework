@@ -35,6 +35,8 @@ class VideoAnalysisPage(ScrollablePage):
         self._preview_photo: ImageTk.PhotoImage | None = None
         self._poll_id: str | None = None
         self._last_frame = None
+        self._saved_stable_episode: tuple[str, str] | None = None
+        self._displayed_gate_state: str | None = None
         self._build()
 
     def _build(self) -> None:
@@ -70,7 +72,7 @@ class VideoAnalysisPage(ScrollablePage):
         ttk.Label(preview_card, textvariable=self.source_details, style="MetricDetail.TLabel", wraplength=680).pack(anchor="w", pady=(8, 0))
         ttk.Label(preview_card, text="Classification Mode: Whole Frame — no bounding boxes", style="Notice.TLabel").pack(anchor="w", pady=(4, 0))
         result_card = SectionCard(body, "Current analysis"); result_card.grid(row=0, column=1, sticky="nsew", padx=(6, 0))
-        names = ("Prediction", "Confidence", "Top-2", "Margin", "Status", "Stable Count", "Inference", "Processed FPS", "Analysis")
+        names = ("Gate", "Gate Score", "Prediction", "Confidence", "Top-2", "Margin", "Status", "Stable Count", "Inference", "Processed FPS", "Analysis")
         self.result_vars = {name: tk.StringVar(value="—") for name in names}
         for name in names:
             row = ttk.Frame(result_card, style="Card.TFrame"); row.pack(fill="x", pady=3)
@@ -116,6 +118,10 @@ class VideoAnalysisPage(ScrollablePage):
         if source is None:
             messagebox.showinfo("Select a video", "Choose a recorded video before starting.", parent=self); return
         self.worker = VideoInferenceWorker(source, int(self.frame_skip.get()), int(self.smoothing_window.get()), int(self.stable_frames.get()))
+        self._saved_stable_episode = None
+        self._displayed_gate_state = None
+        for variable in self.result_vars.values(): variable.set("—")
+        self.snake_warning.pack_forget()
         self.worker.start(); self.session_status.set("Starting…")
         self.start_button.configure(state="disabled"); self.pause_button.configure(state="normal", text="Pause"); self.stop_button.configure(state="normal")
         self._schedule_poll()
@@ -156,9 +162,31 @@ class VideoAnalysisPage(ScrollablePage):
         self.stat_vars["Frames Captured"].set(str(update.frames_captured)); self.stat_vars["Frames Processed"].set(str(update.frames_processed))
         self.stat_vars["Source FPS"].set(f"{update.source_fps:.2f}"); self.stat_vars["Processed FPS"].set(f"{update.processed_fps:.2f}")
         self.stat_vars["Average Inference"].set(f"{update.average_inference_ms:.2f} ms"); self.stat_vars["Stable Events"].set(str(update.stable_events))
-        if update.analysis is not None:
+        if update.gate is not None and update.gate.decision == "NON_WILDLIFE":
+            self._saved_stable_episode = None
+            self._show_rejected(update)
+            if (self._displayed_gate_state != "NON_WILDLIFE"
+                    or self.session_status.get().startswith("Stable event saved:")):
+                self.session_status.set("Frame rejected by Wildlife Gate")
+        elif update.gate is not None and update.gate.decision == "UNCERTAIN":
+            if update.gate_timed_out:
+                self._saved_stable_episode = None
+            self._show_uncertain(update)
+            if (self._displayed_gate_state != "UNCERTAIN"
+                    or self.session_status.get().startswith("Stable event saved:")):
+                self.session_status.set("Gate uncertain - species classification paused")
+        elif update.gate is not None and update.gate.decision == "WILDLIFE" and update.analysis is not None:
+            saved_episode = (update.episode_key, update.analysis.predicted_class)
+            if (self._displayed_gate_state not in (None, "WILDLIFE")
+                    or (self.session_status.get().startswith("Stable event saved:")
+                        and self._saved_stable_episode != saved_episode)):
+                self.session_status.set("Wildlife analysis running")
             self._show_analysis(update.analysis)
+            self.result_vars["Gate"].set("WILDLIFE")
+            self.result_vars["Gate Score"].set(f"Wildlife Score: {update.gate.wildlife_probability*100:.2f}%")
             self._persist_eligible_event(update)
+        if update.gate is not None:
+            self._displayed_gate_state = update.gate.decision
         if update.kind in {"complete", "error"}:
             self.session_status.set(update.message)
             if update.kind == "error": messagebox.showerror("Video source error", update.message, parent=self)
@@ -179,6 +207,38 @@ class VideoAnalysisPage(ScrollablePage):
         if result.predicted_class in {"Venomous_Snake", "Non_Venomous_Snake"}: self.snake_warning.pack(fill="x", pady=(10, 0))
         else: self.snake_warning.pack_forget()
 
+    def _show_rejected(self, update: VideoUpdate) -> None:
+        gate = update.gate
+        if gate is None:
+            return
+        for variable in self.result_vars.values(): variable.set("—")
+        self.result_vars["Gate"].set("NON-WILDLIFE")
+        self.result_vars["Gate Score"].set(f"Non-Wildlife Score: {gate.non_wildlife_probability*100:.2f}%")
+        self.result_vars["Prediction"].set("Species Classification: Skipped")
+        self.result_vars["Status"].set("REJECTED")
+        self.result_vars["Stable Count"].set("0")
+        self.result_vars["Inference"].set(f"{gate.inference_time_ms:.2f} ms")
+        self.result_vars["Processed FPS"].set(self.stat_vars["Processed FPS"].get())
+        self.result_vars["Analysis"].set("Frame rejected by Wildlife Gate")
+        self.snake_warning.pack_forget()
+
+    def _show_uncertain(self, update: VideoUpdate) -> None:
+        gate = update.gate
+        if gate is None:
+            return
+        for variable in self.result_vars.values(): variable.set("—")
+        self.result_vars["Gate"].set("UNCERTAIN")
+        self.result_vars["Gate Score"].set(f"Wildlife Score: {gate.wildlife_probability*100:.2f}%")
+        self.result_vars["Prediction"].set("Species Classification: Paused")
+        self.result_vars["Status"].set("UNCERTAIN")
+        self.result_vars["Inference"].set(f"{gate.inference_time_ms:.2f} ms")
+        self.result_vars["Processed FPS"].set(self.stat_vars["Processed FPS"].get())
+        self.result_vars["Analysis"].set(
+            "Uncertain-frame limit reached; sighting reset" if update.gate_timed_out
+            else "Awaiting stronger Wildlife Gate evidence"
+        )
+        self.snake_warning.pack_forget()
+
     def _source_identity(self) -> tuple[str, str]:
         if self.source_mode.get() == "webcam":
             return "WEBCAM", f"Camera {self.camera_index.get()}"
@@ -186,13 +246,18 @@ class VideoAnalysisPage(ScrollablePage):
 
     def _persist_eligible_event(self, update: VideoUpdate) -> None:
         result = update.analysis
-        if result is None or self._last_frame is None:
+        if (result is None or update.gate is None or update.gate.decision != "WILDLIFE"
+                or self._last_frame is None or not update.episode_key):
+            return
+        episode = (update.episode_key, result.predicted_class)
+        if self._saved_stable_episode == episode:
             return
         source_type, source_name = self._source_identity()
         video_time = f"{update.frames_captured/update.source_fps:.6f}" if source_type == "VIDEO" and update.source_fps > 0 else ""
         try:
             event = self.history.log_stable_frame(
                 Image.fromarray(self._last_frame), source_type=source_type, source_name=source_name,
+                episode_key=update.episode_key,
                 predicted_class=result.predicted_class, display_class=friendly_name(result.predicted_class),
                 category=CATEGORIES[result.predicted_class], confidence=result.confidence,
                 top2_class=result.top2_class, top2_probability=result.top2_probability,
@@ -205,6 +270,7 @@ class VideoAnalysisPage(ScrollablePage):
             self.session_status.set(f"History logging warning: {exc}")
             return
         if event is not None:
+            self._saved_stable_episode = episode
             self.session_status.set(f"Stable event saved: {event.display_class}")
 
     def save_current_frame(self) -> None:
