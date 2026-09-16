@@ -1,0 +1,142 @@
+{
+  "candidate_version": "video_dataset_candidate_v2",
+  "source_candidate": "../video_dataset_candidate_v1",
+  "authoritative_review_file": "../video_dataset_candidate_v1/review_worklist_manual.csv",
+  "eligible_rule": "label_status == SOURCE_VERIFIED AND review_status == APPROVED",
+  "total_approved_frames": 270,
+  "excluded_rejected_frames": 11,
+  "excluded_unresolved_frames": 327,
+  "splits": {
+    "TRAIN": {
+      "videos": 13,
+      "split_groups": 11,
+      "approved_frames": 203,
+      "class_frames": {
+        "Non_Venomous_Snake": 51,
+        "Venomous_Snake": 152
+      },
+      "source_frames": {
+        "rescuer": 49,
+        "web": 154
+      },
+      "species": [
+        "Crotalus atrox",
+        "Deinagkistrodon acutus",
+        "Echis ocellatus",
+        "Laticauda colubrina",
+        "Macrovipera lebetina",
+        "Natrix tessellata",
+        "Pseudocerastes urarachnoides",
+        "Thamnophis cyrtopsis",
+        "Toxicodryas pulverulenta",
+        "Vipera ammodytes"
+      ],
+      "video_ids": [
+        "VID_122382ce5c765a32",
+        "VID_163687650fcdfb63",
+        "VID_231f8d52f5a53b32",
+        "VID_536a4aa97123c549",
+        "VID_6814632a9a62e6c6",
+        "VID_7871d82c6a5700eb",
+        "VID_7c9fedb83b820769",
+        "VID_905a6a9384387911",
+        "VID_9aea09cb5791b643",
+        "VID_afb3dc424d964b10",
+        "VID_b6f7103453fb6035",
+        "VID_cb04e4a6dcb7c6ea",
+        "VID_ffd2ba7c4edda0a1"
+      ],
+      "split_group_ids": [
+        "LEAKAGE_GROUP_STV1608_0010",
+        "LEAKAGE_GROUP_STV1747_0001",
+        "LEAKAGE_rescuer_snake_source_group_026",
+        "LEAKAGE_rescuer_snake_source_group_028",
+        "LEAKAGE_rescuer_snake_source_group_041",
+        "LEAKAGE_rescuer_snake_source_group_042",
+        "LEAKAGE_web_snake_source_group_044",
+        "LEAKAGE_web_snake_source_group_046",
+        "LEAKAGE_web_snake_source_group_048",
+        "LEAKAGE_web_snake_source_group_049",
+        "LEAKAGE_web_snake_source_group_050"
+      ]
+    },
+    "VALIDATION": {
+      "videos": 3,
+      "split_groups": 3,
+      "approved_frames": 29,
+      "class_frames": {
+        "Non_Venomous_Snake": 11,
+        "Venomous_Snake": 18
+      },
+      "source_frames": {
+        "rescuer": 7,
+        "web": 22
+      },
+      "species": [
+        "Aspidelaps lubricus",
+        "Crotalus horridus",
+        "Elaphe climacophora"
+      ],
+      "video_ids": [
+        "VID_78328983a941f244",
+        "VID_c6dec41a33140417",
+        "VID_cf668d0677dbbd8f"
+      ],
+      "split_group_ids": [
+        "LEAKAGE_rescuer_snake_source_group_024",
+        "LEAKAGE_web_snake_source_group_043",
+        "LEAKAGE_web_snake_source_group_047"
+      ]
+    },
+    "INDEPENDENT_VIDEO_TEST": {
+      "videos": 2,
+      "split_groups": 2,
+      "approved_frames": 38,
+      "class_frames": {
+        "Non_Venomous_Snake": 27,
+        "Venomous_Snake": 11
+      },
+      "source_frames": {
+        "rescuer": 11,
+        "web": 27
+      },
+      "species": [
+        "Bitis nasicornis",
+        "Python regius"
+      ],
+      "video_ids": [
+        "VID_2fa5a241b315c1a7",
+        "VID_babc3e7bef3c3d3e"
+      ],
+      "split_group_ids": [
+        "LEAKAGE_rescuer_snake_source_group_025",
+        "LEAKAGE_web_snake_source_group_045"
+      ]
+    }
+  },
+  "conservative_merged_split_groups": {
+    "LEAKAGE_GROUP_STV1747_0001": [
+      "VID_163687650fcdfb63",
+      "VID_7871d82c6a5700eb"
+    ],
+    "LEAKAGE_GROUP_STV1608_0010": [
+      "VID_7c9fedb83b820769",
+      "VID_ffd2ba7c4edda0a1"
+    ]
+  },
+  "leakage_checks": {
+    "no_video_in_multiple_splits": true,
+    "no_split_group_in_multiple_splits": true,
+    "no_frame_id_in_multiple_splits": true,
+    "no_approved_frame_hash_in_multiple_splits": true,
+    "no_rejected_frame_admitted": true,
+    "no_review_required_frame_admitted": true,
+    "no_unresolved_label_frame_admitted": true,
+    "exactly_270_approved_frames": true,
+    "exactly_181_venomous_frames": true,
+    "exactly_89_nonvenomous_frames": true
+  },
+  "duplicate_approved_hashes_across_source_videos": {},
+  "test_set_policy": "The independent video test is separate from the frozen image test and must not be used for threshold tuning, epoch selection, hyperparameter selection, or model selection.",
+  "dataset_fingerprint": "6d84bc110af9a51f66c13ccf34766e642629b5cfc42a2aea62f81637d0866505"
+}

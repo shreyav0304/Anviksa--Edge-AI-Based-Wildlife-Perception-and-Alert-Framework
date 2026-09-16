@@ -1,0 +1,23 @@
+{
+  "official_v1": {
+    "accuracy": 0.9541284403669725,
+    "macro_precision": 0.9688672743760461,
+    "macro_recall": 0.9686971396837043,
+    "macro_f1": 0.9687245232484056,
+    "snake_macro_recall": 0.9215702570921986,
+    "snake_macro_f1": 0.9237181985191782,
+    "nonvenomous_to_venomous_errors": 11,
+    "venomous_to_nonvenomous_errors": 8
+  },
+  "experimental_video_frame_v1": {
+    "accuracy": 0.9467889908256881,
+    "macro_precision": 0.963438461257802,
+    "macro_recall": 0.9647473549825898,
+    "macro_f1": 0.9640191124531425,
+    "snake_macro_recall": 0.9077460106382979,
+    "snake_macro_f1": 0.9106017511572138,
+    "nonvenomous_to_venomous_errors": 10,
+    "venomous_to_nonvenomous_errors": 12
+  },
+  "promotion_status": "NOT_PROMOTED"
+}

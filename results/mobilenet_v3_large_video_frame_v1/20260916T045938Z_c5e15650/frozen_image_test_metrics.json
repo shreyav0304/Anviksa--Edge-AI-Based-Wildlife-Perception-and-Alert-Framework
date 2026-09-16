@@ -1,0 +1,126 @@
+{
+  "accuracy": 0.9467889908256881,
+  "macro_precision": 0.963438461257802,
+  "macro_recall": 0.9647473549825898,
+  "macro_f1": 0.9640191124531425,
+  "per_class": [
+    {
+      "class": "Cow",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 39
+    },
+    {
+      "class": "Deer",
+      "precision": 0.958904109589041,
+      "recall": 0.9722222222222222,
+      "f1": 0.9655172413793104,
+      "support": 72
+    },
+    {
+      "class": "Elephant",
+      "precision": 0.9753086419753086,
+      "recall": 1.0,
+      "f1": 0.9875,
+      "support": 79
+    },
+    {
+      "class": "Monkey",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 28
+    },
+    {
+      "class": "Non_Venomous_Snake",
+      "precision": 0.9076923076923077,
+      "recall": 0.921875,
+      "f1": 0.9147286821705426,
+      "support": 128
+    },
+    {
+      "class": "Venomous_Snake",
+      "precision": 0.9197080291970803,
+      "recall": 0.8936170212765957,
+      "f1": 0.9064748201438849,
+      "support": 141
+    },
+    {
+      "class": "Wild_Boar",
+      "precision": 0.9824561403508771,
+      "recall": 0.9655172413793104,
+      "f1": 0.9739130434782609,
+      "support": 58
+    }
+  ],
+  "confusion_matrix": [
+    [
+      39,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      70,
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      79,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      28,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      118,
+      10,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      12,
+      126,
+      0
+    ],
+    [
+      0,
+      0,
+      2,
+      0,
+      0,
+      0,
+      56
+    ]
+  ],
+  "snake_macro_recall": 0.9077460106382979,
+  "snake_macro_f1": 0.9106017511572138,
+  "nonvenomous_to_venomous_errors": 10,
+  "venomous_to_nonvenomous_errors": 12
+}

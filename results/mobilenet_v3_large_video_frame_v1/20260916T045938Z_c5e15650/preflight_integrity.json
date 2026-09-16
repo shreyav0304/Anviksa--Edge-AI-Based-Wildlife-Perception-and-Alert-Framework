@@ -1,0 +1,72 @@
+{
+  "clean_train_counts": {
+    "Cow": 316,
+    "Deer": 579,
+    "Elephant": 638,
+    "Monkey": 227,
+    "Non_Venomous_Snake": 598,
+    "Venomous_Snake": 889,
+    "Wild_Boar": 464
+  },
+  "added_video_train_counts": {
+    "Cow": 0,
+    "Deer": 0,
+    "Elephant": 0,
+    "Monkey": 0,
+    "Non_Venomous_Snake": 51,
+    "Venomous_Snake": 152,
+    "Wild_Boar": 0
+  },
+  "combined_train_counts": {
+    "Cow": 316,
+    "Deer": 579,
+    "Elephant": 638,
+    "Monkey": 227,
+    "Non_Venomous_Snake": 649,
+    "Venomous_Snake": 1041,
+    "Wild_Boar": 464
+  },
+  "clean_validation_counts": {
+    "Cow": 40,
+    "Deer": 74,
+    "Elephant": 81,
+    "Monkey": 29,
+    "Non_Venomous_Snake": 104,
+    "Venomous_Snake": 158,
+    "Wild_Boar": 59
+  },
+  "added_video_validation_counts": {
+    "Cow": 0,
+    "Deer": 0,
+    "Elephant": 0,
+    "Monkey": 0,
+    "Non_Venomous_Snake": 11,
+    "Venomous_Snake": 18,
+    "Wild_Boar": 0
+  },
+  "combined_validation_counts": {
+    "Cow": 40,
+    "Deer": 74,
+    "Elephant": 81,
+    "Monkey": 29,
+    "Non_Venomous_Snake": 115,
+    "Venomous_Snake": 176,
+    "Wild_Boar": 59
+  },
+  "combined_train_total": 3914,
+  "combined_validation_total": 574,
+  "sealed_video_test_total": 38,
+  "integrity_checks": {
+    "no_video_test_in_train": true,
+    "no_video_test_in_validation": true,
+    "no_duplicate_hash_across_train_validation": true,
+    "no_video_crossing_train_validation": true,
+    "no_leakage_group_crossing_train_validation": true,
+    "video_train_counts_exact": true,
+    "video_validation_counts_exact": true,
+    "video_test_counts_exact": true,
+    "all_references_exist": true
+  },
+  "clean_dataset_fingerprint": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "video_candidate_fingerprint": "6d84bc110af9a51f66c13ccf34766e642629b5cfc42a2aea62f81637d0866505"
+}

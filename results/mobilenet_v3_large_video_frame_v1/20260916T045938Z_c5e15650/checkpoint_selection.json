@@ -1,0 +1,12 @@
+{
+  "selected_stage": "fine_tuning",
+  "selected_stage_epoch": 7,
+  "selection_criterion": "maximum combined validation accuracy across stage checkpoints",
+  "selected_validation_accuracy_during_fit": 0.9320557713508606,
+  "selected_source_weights": "fine_tuned_best.weights.h5",
+  "selected_model": "selected_model.keras",
+  "selected_model_sha256": "4f688ea8eb85f584efa89a1095a8b4ea685ec17c0714d9f0a24de0b5d0fd708f",
+  "hash_recorded_at_utc": "2026-09-16T06:01:14.808343+00:00",
+  "fine_tune_layers": 45,
+  "trainable_backbone_layers": 36
+}

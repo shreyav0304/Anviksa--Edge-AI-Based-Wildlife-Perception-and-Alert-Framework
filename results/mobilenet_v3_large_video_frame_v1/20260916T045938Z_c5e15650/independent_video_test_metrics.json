@@ -1,0 +1,114 @@
+{
+  "accuracy": 0.7368421052631579,
+  "macro_precision": 0.7619047619047619,
+  "macro_recall": 0.8148148148148149,
+  "macro_f1": 0.7301136363636364,
+  "per_class": [
+    {
+      "class": "Non_Venomous_Snake",
+      "precision": 1.0,
+      "recall": 0.6296296296296297,
+      "f1": 0.7727272727272727,
+      "support": 27
+    },
+    {
+      "class": "Venomous_Snake",
+      "precision": 0.5238095238095238,
+      "recall": 1.0,
+      "f1": 0.6875,
+      "support": 11
+    }
+  ],
+  "confusion_matrix": [
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      17,
+      10,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      11,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "per_video": {
+    "VID_2fa5a241b315c1a7": {
+      "expected_class": "Venomous_Snake",
+      "species": "Bitis nasicornis",
+      "frames": 11,
+      "correct_frames": 11,
+      "incorrect_frames": 0,
+      "accuracy": 1.0,
+      "predicted_class_distribution": {
+        "Venomous_Snake": 11
+      }
+    },
+    "VID_babc3e7bef3c3d3e": {
+      "expected_class": "Non_Venomous_Snake",
+      "species": "Python regius",
+      "frames": 27,
+      "correct_frames": 17,
+      "incorrect_frames": 10,
+      "accuracy": 0.6296296296296297,
+      "predicted_class_distribution": {
+        "Non_Venomous_Snake": 17,
+        "Venomous_Snake": 10
+      }
+    }
+  },
+  "sealed_opened_at_utc": "2026-09-16T06:01:42.153375+00:00",
+  "checkpoint_sha256": "4f688ea8eb85f584efa89a1095a8b4ea685ec17c0714d9f0a24de0b5d0fd708f"
+}

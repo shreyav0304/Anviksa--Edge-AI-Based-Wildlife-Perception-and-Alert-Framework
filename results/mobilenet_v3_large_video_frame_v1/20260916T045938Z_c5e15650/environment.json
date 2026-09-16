@@ -1,0 +1,10 @@
+{
+  "generated_at_utc": "2026-09-16T04:59:38.100784+00:00",
+  "python_version": "3.11.2 (tags/v3.11.2:878ead1, Feb  7 2023, 16:38:35) [MSC v.1934 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "tensorflow_version": "2.21.0",
+  "keras_version": "3.15.1",
+  "numpy_version": "2.4.3",
+  "gpu_devices": [],
+  "sklearn_version": "1.8.0"
+}

@@ -27,6 +27,18 @@ combined_dataset/
 clean_dataset/
 dataset_integrity_reports/
 dataset_v2_candidate/
+snake_video_dataset/video_dataset_candidate_v1/
+snake_video_dataset/extracted_frames/
+snake_video_dataset/reviewed_frames/
+snake_video_dataset/reports/
+
+# Raw/local snake videos (previously tracked files remain tracked)
+snake_video_dataset/source_videos/**/*.avi
+snake_video_dataset/source_videos/**/*.mp4
+snake_video_dataset/source_videos/**/*.webm
+snake_video_dataset/source_videos/**/*.mov
+snake_video_dataset/source_videos/**/*.mkv
+snake_video_dataset/source_videos/**/*.m4v
 
 # Training checkpoints and duplicate/legacy model files
 *.weights.h5
@@ -35,6 +47,8 @@ results/custom_cnn/
 results/mobilenet_v2/
 results/mobilenet_v3_large/
 results/efficientnet_b0/
+results/mobilenet_v3_large_video_frame_v1/*/selected_model.keras
+results/mobilenet_v3_large_video_frame_v1/*/*_rows.csv
 
 # Deployment models are published from pi_deployment/models only
 results/deployment/*/*.tflite

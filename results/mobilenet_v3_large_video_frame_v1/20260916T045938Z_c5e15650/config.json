@@ -1,0 +1,46 @@
+{
+  "model_key": "mobilenet_v3_large_video_frame_v1",
+  "dataset_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\clean_dataset",
+  "metadata_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\dataset_integrity_reports\\clean",
+  "results_root": "C:\\Users\\yesam\\Desktop\\anviksa_ai\\results",
+  "image_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "seed": 42,
+  "initial_epochs": 30,
+  "fine_tune_epochs": 25,
+  "initial_learning_rate": 0.001,
+  "fine_tune_learning_rate": 1e-05,
+  "early_stopping_patience": 6,
+  "reduce_lr_patience": 3,
+  "reduce_lr_factor": 0.5,
+  "class_names": [
+    "Cow",
+    "Deer",
+    "Elephant",
+    "Monkey",
+    "Non_Venomous_Snake",
+    "Venomous_Snake",
+    "Wild_Boar"
+  ],
+  "dataset_fingerprint": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "augmentation": {
+    "horizontal_flip": true,
+    "rotation_factor": 0.055,
+    "translation_height": 0.1,
+    "translation_width": 0.1,
+    "zoom_factor": 0.15,
+    "contrast_factor": 0.1,
+    "brightness_factor": 0.1
+  },
+  "architecture_registry_key": "mobilenet_v3_large",
+  "experiment_name": "mobilenet_v3_large_video_frame_v1",
+  "clean_dataset_fingerprint": "b103634bb6a4a01785cb7c7e3b176223325052da47228dba687edaf43a84c594",
+  "video_candidate_fingerprint": "6d84bc110af9a51f66c13ccf34766e642629b5cfc42a2aea62f81637d0866505",
+  "combined_train_count": 3914,
+  "combined_validation_count": 574,
+  "selection_criterion": "maximum combined validation accuracy across stage checkpoints",
+  "sealed_video_test_policy": "not decoded until selected checkpoint SHA-256 is recorded"
+}
