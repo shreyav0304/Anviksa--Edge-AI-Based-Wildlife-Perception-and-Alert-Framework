@@ -69,6 +69,7 @@ class ConfusionMatrixPage(ScrollablePage):
         card = SectionCard(self.content, "All models - separate columns")
         card.pack(fill="x", pady=(0, 12))
         ttk.Label(card, text="Use the horizontal scrollbar below to view every model on a small display.", style="Muted.TLabel").pack(anchor="w")
+        self._all_normalized = None
         self.all_figure = Figure(figsize=(16, 4.8), dpi=100, facecolor="white")
         self.all_chart = FigureCanvasTkAgg(self.all_figure, master=card)
         self.all_chart.get_tk_widget().configure(width=1600, height=480, highlightthickness=0)
@@ -129,7 +130,9 @@ class ConfusionMatrixPage(ScrollablePage):
         record = self.records[self.model_var.get()]
         normalized = self.view_var.get() == "normalized"
         matrix = record.normalized if normalized else record.raw
-        self._render_all_models(normalized)
+        if self._all_normalized != normalized:
+            self._render_all_models(normalized)
+            self._all_normalized = normalized
         self._render(record.model, matrix, normalized)
         for key, variable in self.metric_vars.items(): variable.set(self._pct(record.metrics[key]))
         source, target, count = record.largest_confusion

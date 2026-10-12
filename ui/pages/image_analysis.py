@@ -29,6 +29,8 @@ class ImageAnalysisPage(ScrollablePage):
         self._last_result: ImageAnalysisResult | None = None
         self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="anviksa-tflite")
         self._running = False
+        self._closed = False
+        self._poll_id = None
         self._build()
 
     def _build(self) -> None:
@@ -114,16 +116,20 @@ class ImageAnalysisPage(ScrollablePage):
             return
         self._running = True
         self.select_button.configure(state="disabled"); self.analyze_button.configure(state="disabled")
+        self.save_button.configure(state="disabled")
         self.activity.configure(text="Analyzing…")
         future = self._executor.submit(self._service.analyze, self.selected_path)
-        self.after(40, self._poll_analysis, future)
+        self._poll_id = self.after(40, self._poll_analysis, future)
 
     def _poll_analysis(self, future: Future[ImageAnalysisResult]) -> None:
         """Poll on Tk's main thread; worker threads never touch widgets."""
+        self._poll_id = None
+        if self._closed:
+            return
         if future.done():
             self._finish_analysis(future)
         else:
-            self.after(40, self._poll_analysis, future)
+            self._poll_id = self.after(40, self._poll_analysis, future)
 
     def _finish_analysis(self, future: Future[ImageAnalysisResult]) -> None:
         self._running = False
@@ -132,6 +138,7 @@ class ImageAnalysisPage(ScrollablePage):
         try:
             result = future.result()
         except Exception as exc:
+            self._reset_results()
             self.activity.configure(text="Analysis failed")
             messagebox.showerror("Image analysis failed", f"The classifier could not analyze this image.\n\n{exc}", parent=self)
             return
@@ -179,7 +186,7 @@ class ImageAnalysisPage(ScrollablePage):
 
     def save_detection(self) -> None:
         result = self._last_result
-        if result is None or self.selected_path is None:
+        if self._running or result is None or self.selected_path is None:
             return
         try:
             event = self.history.log_image(
@@ -203,4 +210,8 @@ class ImageAnalysisPage(ScrollablePage):
 
     def close(self) -> None:
         """Release the page worker without interrupting an active Lite call."""
+        self._closed = True
+        if self._poll_id is not None:
+            self.after_cancel(self._poll_id)
+            self._poll_id = None
         self._executor.shutdown(wait=False, cancel_futures=True)

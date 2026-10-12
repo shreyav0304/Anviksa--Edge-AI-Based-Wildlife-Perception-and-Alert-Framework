@@ -15,7 +15,7 @@ def probe(label: str, code: str, *, optional: bool = False) -> bool:
         env = dict(os.environ, MPLCONFIGDIR=cache, PYTHONDONTWRITEBYTECODE="1")
         try:
             result = subprocess.run(
-                [sys.executable, "-B", "-c", code], env=env,
+                [sys.executable, *([] if sys.flags.no_user_site == 0 else ["-s"]), "-B", "-c", code], env=env,
                 capture_output=True, text=True, errors="replace", timeout=60,
             )
         except (OSError, subprocess.TimeoutExpired) as exc:

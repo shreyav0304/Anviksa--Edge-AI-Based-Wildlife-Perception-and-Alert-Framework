@@ -44,6 +44,8 @@ def _load_matrix(path: Path, value_type: type) -> np.ndarray:
         raise FileNotFoundError(f"Validated confusion matrix not found: {path}")
     with path.open(newline="", encoding="utf-8") as handle:
         rows = list(csv.reader(handle))
+    if len(rows) != 8 or any(len(row) != 8 for row in rows):
+        raise ValueError(f"Expected a labeled 7x7 matrix in {path}")
     if tuple(rows[0][1:]) != CLASS_NAMES or tuple(row[0] for row in rows[1:]) != CLASS_NAMES:
         raise ValueError(f"Class order mismatch in {path}")
     matrix = np.asarray([[value_type(value) for value in row[1:]] for row in rows[1:]])
@@ -67,6 +69,7 @@ def load_confusion_records() -> dict[str, ConfusionMatrixRecord]:
     ) as handle:
         summaries = {row["Model"]: row for row in csv.DictReader(handle)}
     records: dict[str, ConfusionMatrixRecord] = {}
+    reference_labels = None
     nonvenomous = CLASS_NAMES.index("Non_Venomous_Snake")
     venomous = CLASS_NAMES.index("Venomous_Snake")
     for model, run in COMPLETED_RUNS.items():
@@ -88,9 +91,16 @@ def load_confusion_records() -> dict[str, ConfusionMatrixRecord]:
                 raise ValueError(f"Published probability rows do not sum to one for {model}")
             if not np.issubdtype(labels.dtype, np.integer) or np.any(labels < 0) or np.any(labels >= 7):
                 raise ValueError(f"Invalid published class labels for {model}")
+            if reference_labels is not None and not np.array_equal(labels, reference_labels):
+                raise ValueError(f"{model} cache labels differ from the shared frozen test set")
+            reference_labels = labels.copy()
             raw = np.zeros((7, 7), dtype=np.int64)
             np.add.at(raw, (labels, probabilities.argmax(axis=1)), 1)
+            if np.any(raw.sum(axis=1) == 0):
+                raise ValueError(f"{model} cache is missing test classes")
             normalized = raw / raw.sum(axis=1, keepdims=True)
+        if np.any(raw < 0) or np.any(raw.sum(axis=1) == 0):
+            raise ValueError(f"{model} matrix must have nonnegative counts and every test class")
         total = int(raw.sum())
         correct = int(np.trace(raw))
         incorrect = total - correct

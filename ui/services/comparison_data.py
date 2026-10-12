@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -38,7 +39,12 @@ class ModelComparisonRecord:
 
 
 def _optional_float(value: str) -> float | None:
-    return None if value.strip().upper() == "N/A" else float(value)
+    if value.strip().upper() == "N/A":
+        return None
+    number = float(value)
+    if not math.isfinite(number) or number < 0:
+        raise ValueError("Comparison values must be finite and nonnegative")
+    return number
 
 
 def _read_json(path: Path) -> dict:
@@ -84,6 +90,17 @@ def load_comparison_records() -> tuple[ModelComparisonRecord, ...]:
     records: list[ModelComparisonRecord] = []
     for row in rows:
         model = row["Model"]
+        if model in COMPLETED_RUNS:
+            if row["Status"] != "COMPLETED":
+                raise ValueError(f"{model} must have COMPLETED status")
+            for field, value in row.items():
+                if field in {"Model", "Status", "Algorithm"}:
+                    continue
+                number = _optional_float(value)
+                if number is None:
+                    raise ValueError(f"{model} is missing {field}")
+                if field not in {"Parameters", "Model_Size_MiB", "Inference_Time_ms", "FPS"} and number > 1:
+                    raise ValueError(f"{model} has out-of-range {field}")
         if model == "EfficientNetB0":
             numeric_fields = [value for key, value in row.items() if key not in {"Model", "Status", "Algorithm"}]
             if row["Status"] != "INCOMPLETE" or any(value != "N/A" for value in numeric_fields):

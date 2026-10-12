@@ -14,6 +14,7 @@ from .base import ScrollablePage
 
 
 class DetectionHistoryPage(ScrollablePage):
+    MIN_CONTENT_WIDTH = 1120
     def __init__(self, parent: tk.Misc, service: DetectionHistoryService) -> None:
         super().__init__(parent)
         self.service = service
@@ -55,12 +56,21 @@ class DetectionHistoryPage(ScrollablePage):
         table_card = SectionCard(self.content, "History table")
         table_card.pack(fill="x")
         columns = ("timestamp", "source", "prediction", "confidence", "status", "threat", "snapshot")
-        self.table = ttk.Treeview(table_card, columns=columns, show="headings", height=9)
+        table_row = ttk.Frame(table_card, style="Card.TFrame")
+        table_row.pack(fill="x")
+        self.table = ttk.Treeview(table_row, columns=columns, show="headings", height=9)
         headings = ("Timestamp", "Source", "Prediction", "Confidence", "Status", "Threat", "Snapshot")
         widths = (190, 90, 170, 100, 100, 90, 100)
         for column, heading, width in zip(columns, headings, widths, strict=True):
             self.table.heading(column, text=heading); self.table.column(column, width=width, anchor="center")
-        self.table.pack(fill="x"); self.table.bind("<<TreeviewSelect>>", self._selection_changed)
+        self.table.pack(side="left", fill="both", expand=True)
+        xscroll = ttk.Scrollbar(table_card, orient="horizontal", command=self.table.xview)
+        yscroll = ttk.Scrollbar(table_row, orient="vertical", command=self.table.yview)
+        self.table.configure(xscrollcommand=xscroll.set, yscrollcommand=yscroll.set)
+        xscroll.pack(fill="x")
+        # A visible vertical scrollbar keeps every event reachable on Linux.
+        yscroll.pack(side="right", fill="y")
+        self.table.bind("<<TreeviewSelect>>", self._selection_changed)
         ttk.Label(table_card, textvariable=self.empty_var, style="Notice.TLabel").pack(anchor="w", pady=(7, 0))
 
         details = SectionCard(self.content, "Selected event details"); details.pack(fill="x", pady=(12, 0))
@@ -82,7 +92,11 @@ class DetectionHistoryPage(ScrollablePage):
         ttk.Label(limitation, text="Threat level is application metadata, not a neural-network output. No history deletion controls are provided in this phase.", style="Notice.TLabel").pack(anchor="w", pady=(8, 0))
 
     def refresh_history(self) -> None:
-        self.events = self.service.load_events()
+        try:
+            self.events = self.service.load_events()
+        except (OSError, UnicodeError, ValueError) as exc:
+            self.empty_var.set(f"Unable to read history: {exc}. Existing records were preserved.")
+            return
         self._update_summaries()
         self.apply_filters()
 
@@ -148,6 +162,9 @@ class DetectionHistoryPage(ScrollablePage):
             messagebox.showinfo("Nothing to export", "No filtered events are available.", parent=self); return
         filename = filedialog.asksaveasfilename(parent=self, title="Export filtered detection history", defaultextension=".csv", filetypes=(("CSV", "*.csv"),))
         if not filename: return
+        if Path(filename).resolve() == self.service.csv_path.resolve():
+            messagebox.showerror("Choose another destination", "Export to a separate CSV file to preserve the master detection history.", parent=self)
+            return
         try: self.service.export_csv(self.filtered_events, Path(filename))
         except OSError as exc: messagebox.showerror("Export failed", str(exc), parent=self); return
         messagebox.showinfo("Export complete", f"Exported {len(self.filtered_events)} event(s).", parent=self)

@@ -1,9 +1,18 @@
-"""Thin adapters between the UI and validated project backends."""
+"""Lazy backend adapters; data loading needs no camera or plotting dependency."""
+from importlib import import_module
+_MODULES = {
+    "ImageAnalysisResult": "image_inference", "ImageInferenceService": "image_inference",
+    "ModelComparisonRecord": "comparison_data", "load_comparison_records": "comparison_data",
+    "ConfusionMatrixRecord": "confusion_data", "load_confusion_records": "confusion_data",
+    "LiveAnalysis": "video_inference", "TemporalAnalyzer": "video_inference",
+    "VideoInferenceWorker": "video_inference", "DetectionEvent": "detection_history",
+    "DetectionHistoryService": "detection_history",
+}
+__all__ = list(_MODULES)
 
-from .image_inference import ImageAnalysisResult, ImageInferenceService
-from .comparison_data import ModelComparisonRecord, load_comparison_records
-from .confusion_data import ConfusionMatrixRecord, load_confusion_records
-from .video_inference import LiveAnalysis, TemporalAnalyzer, VideoInferenceWorker
-from .detection_history import DetectionEvent, DetectionHistoryService
-
-__all__ = ["ImageAnalysisResult", "ImageInferenceService", "ModelComparisonRecord", "load_comparison_records", "ConfusionMatrixRecord", "load_confusion_records", "LiveAnalysis", "TemporalAnalyzer", "VideoInferenceWorker", "DetectionEvent", "DetectionHistoryService"]
+def __getattr__(name):
+    if name in _MODULES:
+        value = getattr(import_module("." + _MODULES[name], __name__), name)
+        globals()[name] = value
+        return value
+    raise AttributeError(name)

@@ -15,6 +15,7 @@ from .base import ScrollablePage
 
 
 class ModelComparisonPage(ScrollablePage):
+    MIN_CONTENT_WIDTH = 1120
     GRAPH_KEYS = (
         ("core", "Core Metrics"),
         ("mse", "MSE"),
@@ -160,5 +161,5 @@ class ModelComparisonPage(ScrollablePage):
         ttk.Label(card, text=benchmark, style="Body.TLabel", wraplength=1050).pack(anchor="w", pady=(4, 10))
         ttk.Label(card, text="EDGE DEPLOYMENT: MobileNetV3 Large has validated Float32 and Float16 TFLite representations.   RASPBERRY PI PERFORMANCE: Pending hardware benchmarking.", style="BodyStrong.TLabel", wraplength=1050).pack(anchor="w")
         ttk.Label(card, text=f"Completed models used the same frozen 545-image test set, seven-class order, and dataset fingerprint: {EXPECTED_FINGERPRINT}", style="Notice.TLabel", wraplength=1050).pack(anchor="w", pady=(10, 8))
-        ttk.Button(card, text="View Confusion Matrices (Phase 4)", command=lambda: self.navigate("confusion")).pack(anchor="w")
+        ttk.Button(card, text="View Confusion Matrices", command=lambda: self.navigate("confusion")).pack(anchor="w")
         return card

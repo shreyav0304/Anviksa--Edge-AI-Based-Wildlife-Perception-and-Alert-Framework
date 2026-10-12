@@ -31,7 +31,7 @@ class ProjectInfoPage(ScrollablePage):
                 for model in manifest["models"]:
                     path = ROOT / "pi_deployment" / model["package_path"]
                     lines.append(f"{model['representation']}: {'File available' if path.is_file() else 'File missing'} ({model['file_size_bytes'] / 1048576:.2f} MiB)")
-                lines.append("File availability does not verify model integrity. Run: python -B pi_deployment/verify_package.py")
+                lines.append("File availability does not verify model integrity. Run: python -B pi_deployment/verify_package.py and python -B scripts/check_dashboard.py")
                 self._section("Deployment models", "\n".join(lines))
             except (OSError, ValueError, KeyError) as exc:
                 self._section("Deployment models", f"Manifest unavailable: {exc}")

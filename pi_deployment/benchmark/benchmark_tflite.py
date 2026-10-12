@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -102,8 +103,9 @@ def choose_image(requested):
         if not path.is_file():
             raise FileNotFoundError(path)
         return path
+    image_dir = PACKAGE_ROOT / "test_images"
     candidates = sorted(
-        path for path in (PACKAGE_ROOT / "test_images").iterdir()
+        path for path in (image_dir.iterdir() if image_dir.is_dir() else ())
         if path.is_file() and path.suffix.lower() in VALID_IMAGE_SUFFIXES
     )
     if not candidates:
@@ -171,6 +173,7 @@ def main() -> None:
         "thread_count": args.threads,
         "batch_size": 1,
         "benchmark_image": str(image_path),
+        "benchmark_image_sha256": hashlib.sha256(image_path.read_bytes()).hexdigest(),
         "model_only": {
             "warmup_iterations": 20,
             "timed_iterations": 200,

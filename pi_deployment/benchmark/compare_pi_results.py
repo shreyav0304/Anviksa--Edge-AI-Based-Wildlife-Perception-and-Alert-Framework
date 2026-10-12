@@ -31,12 +31,39 @@ def load_latest(results_dir: Path) -> dict:
     return found
 
 
+def validate_compatible_runs(selected: dict) -> None:
+    """Do not compare runs from different inputs, hosts, or timing protocols."""
+    payloads = [item for _path, item in selected.values()]
+    if any(not isinstance(item.get("benchmark_image"), str) or not item["benchmark_image"] for item in payloads):
+        raise ValueError("Every benchmark must identify its input image")
+    hashes = [item.get("benchmark_image_sha256") for item in payloads]
+    if all(isinstance(value, str) and len(value) == 64 for value in hashes):
+        images = hashes
+    else:
+        images = [item["benchmark_image"] for item in payloads]
+    if len(set(images)) != 1:
+        raise ValueError("Benchmark images differ; rerun all six configurations with the same image")
+    for section, fields in (
+        ("system", ("raspberry_pi_model", "os", "architecture", "python_version", "interpreter_source")),
+        ("model_only", ("warmup_iterations", "timed_iterations")),
+        ("end_to_end", ("timed_iterations",)),
+    ):
+        reference = tuple(payloads[0][section][field] for field in fields)
+        if any(tuple(item[section][field] for field in fields) != reference for item in payloads[1:]):
+            raise ValueError(f"Benchmark {section} settings differ; use the same device and protocol")
+    if any(item.get("batch_size") != 1 for item in payloads):
+        raise ValueError("Benchmarks must use batch size one")
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--results-dir", default=str(PACKAGE_ROOT / "pi_results"))
     args = parser.parse_args()
     results_dir = Path(args.results_dir).resolve()
-    selected = load_latest(results_dir)
+    try:
+        selected = load_latest(results_dir)
+        validate_compatible_runs(selected)
+    except (OSError, KeyError, TypeError, ValueError, RuntimeError) as exc:
+        parser.error(str(exc))
     rows = []
     for key in sorted(EXPECTED):
         path, item = selected[key]

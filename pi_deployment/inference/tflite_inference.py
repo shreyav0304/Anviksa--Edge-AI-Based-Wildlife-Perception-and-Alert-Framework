@@ -13,6 +13,10 @@ from PIL import Image
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 CLASS_NAMES_PATH = Path(__file__).resolve().with_name("class_names.json")
+EXPECTED_CLASSES = (
+    "Cow", "Deer", "Elephant", "Monkey", "Non_Venomous_Snake",
+    "Venomous_Snake", "Wild_Boar",
+)
 EXPECTED_INPUT_SHAPE = (1, 224, 224, 3)
 EXPECTED_OUTPUT_SHAPE = (1, 7)
 
@@ -41,10 +45,10 @@ def _load_interpreter_class() -> Tuple[Any, str]:
 
 
 def load_class_names(path: Path = CLASS_NAMES_PATH) -> Tuple[str, ...]:
-    names = tuple(json.loads(path.read_text(encoding="utf-8")))
-    if len(names) != 7 or len(set(names)) != 7:
-        raise ValueError("class_names.json must contain seven unique classes.")
-    return names
+    names = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(names, list) or tuple(names) != EXPECTED_CLASSES:
+        raise ValueError("class_names.json must match the exact validated seven-class order.")
+    return tuple(names)
 
 
 def preprocess_image(image: Any) -> np.ndarray:
@@ -64,9 +68,13 @@ def preprocess_image(image: Any) -> np.ndarray:
         array = np.asarray(resized, dtype=np.float32)
     else:
         array = np.asarray(image)
-        if array.ndim != 3 or array.shape[2] != 3:
-            raise ValueError("NumPy image input must be an RGB HxWx3 array.")
-        rgb = Image.fromarray(np.asarray(np.clip(array, 0, 255), dtype=np.uint8), mode="RGB")
+        if array.ndim != 3 or array.shape[2] != 3 or not array.shape[0] or not array.shape[1]:
+            raise ValueError("NumPy image input must be a nonempty RGB HxWx3 array.")
+        if not np.issubdtype(array.dtype, np.number) or not np.isfinite(array).all():
+            raise ValueError("RGB pixels must contain finite real numbers.")
+        if np.iscomplexobj(array) or np.any(array < 0) or np.any(array > 255):
+            raise ValueError("RGB pixels must remain in [0, 255].")
+        rgb = Image.fromarray(np.asarray(array, dtype=np.uint8), mode="RGB")
         resized = rgb.resize((224, 224), resample=Image.Resampling.NEAREST)
         array = np.asarray(resized, dtype=np.float32)
 
@@ -91,8 +99,11 @@ class TFLiteWildlifeClassifier:
             model_path=str(self.model_path), num_threads=num_threads
         )
         self.interpreter.allocate_tensors()
-        self.input_detail = self.interpreter.get_input_details()[0]
-        self.output_detail = self.interpreter.get_output_details()[0]
+        inputs = self.interpreter.get_input_details()
+        outputs = self.interpreter.get_output_details()
+        if len(inputs) != 1 or len(outputs) != 1:
+            raise ValueError("Classifier requires exactly one input and one output tensor.")
+        self.input_detail, self.output_detail = inputs[0], outputs[0]
         self._validate_interface()
 
     def _validate_interface(self) -> None:
@@ -110,6 +121,8 @@ class TFLiteWildlifeClassifier:
     def invoke_preprocessed(self, batch: np.ndarray) -> Tuple[np.ndarray, float]:
         if batch.shape != EXPECTED_INPUT_SHAPE or batch.dtype != np.float32:
             raise ValueError("Input must come from preprocess_image().")
+        if not np.isfinite(batch).all() or np.any(batch < 0) or np.any(batch > 255):
+            raise ValueError("Preprocessed pixels must be finite and in [0, 255].")
         started = perf_counter()
         self.interpreter.set_tensor(self.input_detail["index"], batch)
         self.interpreter.invoke()
@@ -117,6 +130,8 @@ class TFLiteWildlifeClassifier:
         elapsed_ms = (perf_counter() - started) * 1000.0
         if probabilities.shape != (7,) or not np.isfinite(probabilities).all():
             raise ValueError("Interpreter returned invalid probabilities.")
+        if np.any(probabilities < 0) or np.any(probabilities > 1):
+            raise ValueError("Interpreter probabilities must lie in [0, 1].")
         if not np.isclose(float(probabilities.sum()), 1.0, atol=1e-4):
             raise ValueError("Interpreter output does not sum approximately to one.")
         return probabilities, elapsed_ms

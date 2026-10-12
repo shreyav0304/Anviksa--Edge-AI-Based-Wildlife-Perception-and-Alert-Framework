@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+import math
 import re
 import shutil
 import threading
@@ -76,6 +77,8 @@ class DetectionHistoryService:
         self.csv_path = self.root / "detection_history.csv"
         self.snapshot_dir = self.root / "snapshots"
         self.cooldown_seconds = float(cooldown_seconds)
+        if not math.isfinite(self.cooldown_seconds) or self.cooldown_seconds < 0:
+            raise ValueError("Cooldown must be finite and nonnegative")
         self._lock = threading.RLock()
         self._last_event_time: dict[tuple[str, str, str, str | None], float] = {}
         self.malformed_rows = 0
@@ -87,8 +90,15 @@ class DetectionHistoryService:
         with self._lock:
             self._ensure_directories()
             needs_header = not self.csv_path.exists() or self.csv_path.stat().st_size == 0
+            columns = EVENT_FIELDS
+            if not needs_header:
+                with self.csv_path.open(newline="", encoding="utf-8") as existing:
+                    header = next(csv.reader(existing), [])
+                if tuple(header) not in {EVENT_FIELDS, EVENT_FIELDS[:-2]}:
+                    raise ValueError("History CSV header does not match the event schema; preserve the file and repair its header before logging")
+                columns = tuple(header)
             with self.csv_path.open("a", newline="", encoding="utf-8") as handle:
-                writer = csv.DictWriter(handle, fieldnames=EVENT_FIELDS)
+                writer = csv.DictWriter(handle, fieldnames=columns, extrasaction="ignore")
                 if needs_header:
                     writer.writeheader()
                 writer.writerow(asdict(event))
@@ -147,8 +157,14 @@ class DetectionHistoryService:
         # Video sightings get distinct cooldown keys after a gate rejection.
         # Callers without an episode key retain their existing cooldown behavior.
         key = (source_type.upper(), source_name, event_values["predicted_class"], episode_key)
-        clock = time.monotonic() if now_monotonic is None else now_monotonic
+        clock = time.monotonic() if now_monotonic is None else float(now_monotonic)
+        if not math.isfinite(clock):
+            raise ValueError("Event clock must be finite")
         with self._lock:
+            self._last_event_time = {
+                candidate: value for candidate, value in self._last_event_time.items()
+                if clock - value < self.cooldown_seconds
+            }
             previous = self._last_event_time.get(key)
             if previous is not None and clock - previous < self.cooldown_seconds:
                 return None
@@ -168,14 +184,28 @@ class DetectionHistoryService:
         with self._lock, self.csv_path.open(newline="", encoding="utf-8") as handle:
             for row in csv.DictReader(handle):
                 try:
-                    events.append(DetectionEvent(
-                        **{key: row[key] for key in EVENT_FIELDS if key not in {"confidence", "top2_probability", "margin", "uncertain", "stable", "stable_count", "inference_time_ms"}},
-                        confidence=float(row["confidence"]), top2_probability=float(row["top2_probability"]),
-                        margin=float(row["margin"]), uncertain=row["uncertain"].lower() == "true",
-                        stable=row["stable"].lower() == "true", stable_count=int(row["stable_count"]),
-                        inference_time_ms=float(row["inference_time_ms"]),
-                    ))
-                except (KeyError, TypeError, ValueError):
+                    for key in ("frame_number", "video_time_seconds"):
+                        if key not in row:
+                            row[key] = ""
+                    boolean_values = {}
+                    for key in ("uncertain", "stable"):
+                        value = row[key].strip().lower()
+                        if value not in {"true", "false"}:
+                            raise ValueError("Invalid event boolean")
+                        boolean_values[key] = value == "true"
+                    numbers = {key: float(row[key]) for key in ("confidence", "top2_probability", "margin", "inference_time_ms")}
+                    if not all(math.isfinite(value) for value in numbers.values()):
+                        raise ValueError("Nonfinite event number")
+                    if any(not 0 <= numbers[key] <= 1 for key in ("confidence", "top2_probability", "margin")) or numbers["inference_time_ms"] < 0:
+                        raise ValueError("Event number outside its valid range")
+                    count = int(row["stable_count"])
+                    if count < 0:
+                        raise ValueError("Negative stable count")
+                    text_fields = {key: row[key] for key in EVENT_FIELDS if key not in {*numbers, *boolean_values, "stable_count"}}
+                    if any(value is None for value in text_fields.values()):
+                        raise ValueError("Truncated event row")
+                    events.append(DetectionEvent(**text_fields, **numbers, **boolean_values, stable_count=count))
+                except (KeyError, AttributeError, TypeError, ValueError):
                     malformed += 1
         self.malformed_rows = malformed
         return events

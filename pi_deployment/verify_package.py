@@ -43,22 +43,40 @@ def sha256(path: Path) -> str:
 
 def main() -> None:
     checks = []
+    def read_object(relative, expected_type):
+        path = ROOT / relative
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(value, expected_type):
+                raise ValueError(f"Expected {expected_type.__name__}")
+            return value
+        except (OSError, ValueError) as exc:
+            checks.append({"check": f"readable JSON: {relative}", "pass": False, "error": str(exc)})
+            return expected_type()
     for relative in REQUIRED_FILES:
         exists = (ROOT / relative).is_file()
         checks.append({"check": f"required file: {relative}", "pass": exists})
 
     class_path = ROOT / "inference/class_names.json"
-    classes = json.loads(class_path.read_text(encoding="utf-8")) if class_path.is_file() else []
+    classes = read_object("inference/class_names.json", list)
     checks.append({"check": "exact seven-class order", "pass": classes == EXPECTED_CLASSES})
 
     manifest_path = ROOT / "model_manifest.json"
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.is_file() else {}
+    manifest = read_object("model_manifest.json", dict)
     checks.append({"check": "manifest class order", "pass": manifest.get("class_order") == EXPECTED_CLASSES})
-    manifest_models = {item.get("package_path"): item for item in manifest.get("models", [])}
+    model_entries = manifest.get("models", [])
+    if not isinstance(model_entries, list) or any(not isinstance(item, dict) for item in model_entries):
+        checks.append({"check": "manifest model entries", "pass": False})
+        model_entries = []
+    manifest_models = {item.get("package_path"): item for item in model_entries if isinstance(item.get("package_path"), str)}
     for relative, (expected_hash, expected_size) in EXPECTED_MODELS.items():
         path = ROOT / relative
-        actual_hash = sha256(path) if path.is_file() else None
-        actual_size = path.stat().st_size if path.is_file() else None
+        try:
+            actual_hash = sha256(path) if path.is_file() else None
+            actual_size = path.stat().st_size if path.is_file() else None
+        except OSError as exc:
+            checks.append({"check": f"readable model: {relative}", "pass": False, "error": str(exc)})
+            actual_hash = actual_size = None
         item = manifest_models.get(relative, {})
         checks.extend([
             {"check": f"model exists: {relative}", "pass": path.is_file()},

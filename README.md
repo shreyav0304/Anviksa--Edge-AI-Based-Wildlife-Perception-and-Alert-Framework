@@ -42,7 +42,7 @@ The controlled experiments used frozen train, validation, and test manifests. Th
 
 Training and validated TFLite evaluation decode images as RGB, resize to `224 × 224` with nearest-neighbor interpolation, cast to Float32, and retain the external pixel range near `[0,255]`. MobileNetV3 normalization is embedded in the model; callers must not divide pixels by 255 or apply MobileNetV2 preprocessing.
 
-The Raspberry Pi package implements this exact shared input contract. OpenCV is planned as the application-layer interface for camera frames and outdoor image/video processing; camera-stream integration has not yet been completed. The model itself runs completely offline through TensorFlow Lite.
+The Raspberry Pi package implements this exact shared input contract. The desktop application uses OpenCV for recorded videos and USB webcam frames, with Wildlife Gate pre-screening and local detection history. Physical camera validation on Raspberry Pi remains pending. The model itself runs completely offline through TensorFlow Lite.
 
 ## Model comparison
 
@@ -112,7 +112,7 @@ convert_validate_float*.py   Reproducible TFLite conversion and numerical valida
 - Float32 and Float16 TFLite numerical validation: complete
 - Offline Raspberry Pi inference/benchmark package: prepared
 - Physical Raspberry Pi benchmarking: **pending**
-- OpenCV live camera pipeline: **pending**
+- Image/video/USB webcam dashboard and detection history: implemented; **physical Pi validation pending**
 - mmWave trigger integration: **pending**
 - GPIO LED/buzzer integration: **pending**
 - Solar-powered field integration: **concept/planned**
@@ -127,3 +127,31 @@ python verify_package.py
 ```
 
 For Raspberry Pi environment setup and benchmarking, follow [`pi_deployment/README_PI.md`](pi_deployment/README_PI.md).
+
+## Desktop dashboard
+
+The offline Tkinter app provides Overview, Image Analysis, Video/Webcam,
+Model Comparison, Confusion Matrix, Detection History, System Deployment,
+and About Project. Pages load independently so a missing camera/plotting
+dependency does not block the remaining sections. All-model confusion matrices
+have separate columns, with scrollbars for small displays.
+
+On the supported Raspberry Pi desktop, follow
+[the setup guide](docs/raspberry_pi_setup.md), activate the app environment, then:
+
+```bash
+python run_ui.py
+python -B scripts/check_dashboard.py
+python -B -m unittest discover -s tests -v
+```
+
+To include desktop regression checks, run from a graphical login:
+
+```bash
+ANVIKSA_GUI_TESTS=1 python -B -m unittest discover -s tests -v
+```
+
+Runtime history stays in results/detection_history/ and is excluded from Git.
+Model binaries, training data, and validated experiment results are not modified
+by these checks. See [the checkup report](docs/checkup_report.md) for tested scope
+and outstanding hardware validation.

@@ -6,7 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
 
-import cv2
+import hashlib
+from .opencv import require_opencv
 import numpy as np
 
 from pi_deployment.inference.tflite_inference import _load_interpreter_class
@@ -17,6 +18,7 @@ GATE_MODEL_PATH = (
     PROJECT_ROOT / "wildlife_gate" / "results" / "gate_v1"
     / "deployment" / "wildlife_gate_v1_float32.tflite"
 )
+EXPECTED_GATE_SHA256 = "0ac3c6c0dfca692dc6c6d421f60479082e3338936d09af09301bb8c6cf61d4ca"
 INPUT_SHAPE = (1, 224, 224, 3)
 OUTPUT_SHAPE = (1, 1)
 LOWER_THRESHOLD = 0.20
@@ -51,6 +53,8 @@ class WildlifeGateService:
         self.model_path = Path(model_path).resolve()
         if not self.model_path.is_file():
             raise FileNotFoundError(self.model_path)
+        if hashlib.sha256(self.model_path.read_bytes()).hexdigest() != EXPECTED_GATE_SHA256:
+            raise ValueError("Wildlife Gate model hash mismatch; restore the validated deployment file")
         interpreter_class, self.interpreter_source = _load_interpreter_class()
         self.interpreter = interpreter_class(model_path=str(self.model_path), num_threads=num_threads)
         self.interpreter.allocate_tensors()
@@ -70,10 +74,11 @@ class WildlifeGateService:
         frame = np.asarray(frame_rgb)
         if frame.ndim != 3 or frame.shape[2] != 3 or frame.shape[0] == 0 or frame.shape[1] == 0:
             raise ValueError("Gate input must be a nonempty RGB HxWx3 NumPy frame")
-        if not np.issubdtype(frame.dtype, np.number) or not np.isfinite(frame).all():
+        if not np.issubdtype(frame.dtype, np.number) or np.iscomplexobj(frame) or not np.isfinite(frame).all():
             raise ValueError("Gate input must contain finite numeric RGB pixels")
         if frame.min() < 0 or frame.max() > 255:
             raise ValueError("Gate RGB pixels must remain in [0, 255]")
+        cv2 = require_opencv()
         resized = cv2.resize(frame, (224, 224), interpolation=cv2.INTER_LINEAR)
         batch = np.ascontiguousarray(resized[np.newaxis, ...], dtype=np.float32)
         started = perf_counter()

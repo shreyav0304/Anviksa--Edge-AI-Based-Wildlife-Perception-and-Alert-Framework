@@ -1,7 +1,7 @@
 # ANVIKSA Raspberry Pi software setup
 
 This prepares the complete existing Tkinter application for Raspberry Pi 4.
-It does not integrate hardware or optimize the UI. The deployment model remains
+It documents dependencies and the desktop dashboard. Physical hardware integration remains a separate validation step. The deployment model remains
 **MobileNetV3 Large V1 Float32 TFLite**. V2/V3 experiments are not deployment models.
 
 ## Supported installation profile and version strategy
@@ -40,7 +40,7 @@ before adopting it. Do not downgrade the OS system Python or silently build nati
 packages from source. ARM32, alternative interpreters and other Python versions
 are outside the documented installation profile.
 
-The unchanged backend tries `tflite_runtime.interpreter.Interpreter`, then
+The inference backend tries `tflite_runtime.interpreter.Interpreter`, then
 `ai_edge_litert.interpreter.Interpreter`, then `tensorflow.lite.Interpreter`.
 **Full TensorFlow is not required on the Pi.** LiteRT is an alternative, not an
 additional required package. A broken native runtime may raise an exception other
@@ -227,8 +227,7 @@ applicable), logging out/in after any group change. Do not run ANVIKSA as root.
 
 The dependency inventory contains only imports used by the application, with
 standard-library, system, alternate-runtime and future-hardware imports accounted
-for above. No inference implementation, UI, historical requirements, models,
-datasets, video data or experiment results are changed by this preparation.
+for above. The original dependency preparation preserved model binaries, datasets, and experiment results. Subsequent dashboard/runtime fixes are described in docs/checkup_report.md.
 No packages are installed on the Windows development PC. Successful installation
 and physical Pi testing remain deployment steps, not claimed results here.
 
@@ -257,3 +256,34 @@ Keep results/comparison/ and results/model_comparison_dashboard/ in the clone.
 Detection history starts empty on a new Pi and fills as local analyses are saved.
 System Deployment shows local model-file availability and integration status;
 About Project contains the project description and validated research results.
+
+
+## Health checks and recovery
+
+From the repository root, with the app environment active:
+
+    python -B pi_deployment/verify_package.py
+    python -B scripts/check_dashboard.py
+    python -B scripts/check_pi_dependencies.py
+    python -B -m unittest discover -s tests -v
+
+The model/package and dashboard checks are read-only and do not require an
+interpreter, display, camera, training dataset, or full TensorFlow. The dependency
+check uses temporary Matplotlib cache directories; it never opens hardware.
+Regression tests write synthetic history only inside temporary directories.
+
+To include GUI checks from an active graphical login:
+
+    ANVIKSA_GUI_TESTS=1 python -B -m unittest discover -s tests -v
+
+Pages load on first selection. A missing dependency or artifact shows an error
+with a Retry button for that section; the other sections stay accessible.
+Terminal diagnostics and the status bar report refresh/action errors.
+The webcam preview diagnostic uses Tkinter (compatible with the headless OpenCV
+wheel):
+
+    python pi_deployment/webcam_test.py --camera 0
+
+An older local history CSV without the optional video frame/time columns can
+still be read and appended. Export filtered records to a separate filename;
+the app prevents overwriting its master history file.

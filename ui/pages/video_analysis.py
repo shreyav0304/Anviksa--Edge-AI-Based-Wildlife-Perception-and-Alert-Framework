@@ -35,6 +35,7 @@ class VideoAnalysisPage(ScrollablePage):
         self._preview_photo: ImageTk.PhotoImage | None = None
         self._poll_id: str | None = None
         self._last_frame = None
+        self._session_source = None
         self._saved_stable_episode: tuple[str, str] | None = None
         self._displayed_gate_state: str | None = None
         self._build()
@@ -56,6 +57,7 @@ class VideoAnalysisPage(ScrollablePage):
         ttk.Combobox(controls, textvariable=self.smoothing_window, values=("1", "3", "5", "7"), state="readonly", width=4).grid(row=0, column=9)
         ttk.Label(controls, text="Stable", style="MetricLabel.TLabel").grid(row=0, column=10, padx=(16, 4))
         ttk.Combobox(controls, textvariable=self.stable_frames, values=("2", "3", "5"), state="readonly", width=4).grid(row=0, column=11)
+        self._source_controls = tuple(controls.winfo_children())
         actions = ttk.Frame(self.content, style="Page.TFrame"); actions.pack(fill="x", pady=(0, 10))
         self.start_button = ttk.Button(actions, text="Start", command=self.start, style="Primary.TButton"); self.start_button.pack(side="left")
         self.pause_button = ttk.Button(actions, text="Pause", command=self.pause, state="disabled"); self.pause_button.pack(side="left", padx=6)
@@ -88,7 +90,7 @@ class VideoAnalysisPage(ScrollablePage):
             ttk.Label(cell, textvariable=variable, style="BodyStrong.TLabel").pack(anchor="w", pady=(3, 0))
         limitation = SectionCard(self.content, "Model limitation"); limitation.pack(fill="x", pady=(12, 0))
         ttk.Label(limitation, text="Current model has no Background/Unknown class. Empty-scene webcam predictions should be treated as exploratory.", style="Warning.TLabel", wraplength=1050).pack(fill="x")
-        ttk.Label(limitation, text="Temporary stable events are held in memory only. Detection History persistence and runtime snapshots are deferred to Phase 6.", style="Notice.TLabel", wraplength=1050).pack(anchor="w", pady=(8, 0))
+        ttk.Label(limitation, text="Confident, stable wildlife sightings are saved to Detection History with runtime snapshots. Uncertain and gate-rejected frames are not logged as detections.", style="Notice.TLabel", wraplength=1050).pack(anchor="w", pady=(8, 0))
 
     def _mode_changed(self) -> None:
         self.stop()
@@ -103,7 +105,7 @@ class VideoAnalysisPage(ScrollablePage):
         if not filename: return
         path = Path(filename)
         try: info = inspect_video(path)
-        except (OSError, ValueError) as exc:
+        except Exception as exc:
             messagebox.showerror("Unable to open video", str(exc), parent=self); return
         self.video_path = path; self.source_info = info
         duration = f"{info.duration_seconds:.1f}s" if info.duration_seconds is not None else "N/A"
@@ -113,15 +115,24 @@ class VideoAnalysisPage(ScrollablePage):
 
     def start(self) -> None:
         if self.worker and self.worker.running:
+            if self.worker.stop_event.is_set():
+                self.session_status.set("Stopping previous source; wait before restarting")
+                return
             self.worker.resume(); self.session_status.set("Running"); self.pause_button.configure(text="Pause"); return
         source = int(self.camera_index.get()) if self.source_mode.get() == "webcam" else self.video_path
         if source is None:
             messagebox.showinfo("Select a video", "Choose a recorded video before starting.", parent=self); return
+        self._session_source = ("WEBCAM", f"Camera {source}") if isinstance(source, int) else ("VIDEO", source.name)
+        self._last_frame = None
+        self.snapshot_button.configure(state="disabled")
+        self.preview.configure(image="", text="Starting source", width=60, height=22)
+        self._preview_photo = None
         self.worker = VideoInferenceWorker(source, int(self.frame_skip.get()), int(self.smoothing_window.get()), int(self.stable_frames.get()))
         self._saved_stable_episode = None
         self._displayed_gate_state = None
         for variable in self.result_vars.values(): variable.set("—")
         self.snake_warning.pack_forget()
+        self._set_source_controls(False)
         self.worker.start(); self.session_status.set("Starting…")
         self.start_button.configure(state="disabled"); self.pause_button.configure(state="normal", text="Pause"); self.stop_button.configure(state="normal")
         self._schedule_poll()
@@ -133,29 +144,74 @@ class VideoAnalysisPage(ScrollablePage):
         else:
             self.worker.pause(); self.pause_button.configure(text="Resume"); self.session_status.set("Paused")
 
+    def _set_source_controls(self, enabled: bool) -> None:
+        for control in self._source_controls:
+            if isinstance(control, ttk.Combobox):
+                control.configure(state="readonly" if enabled else "disabled")
+            elif isinstance(control, (ttk.Button, ttk.Radiobutton)):
+                control.configure(state="normal" if enabled else "disabled")
+        if enabled:
+            webcam = self.source_mode.get() == "webcam"
+            self.camera_box.configure(state="readonly" if webcam else "disabled")
+            self.select_button.configure(state="disabled" if webcam else "normal")
+
     def stop(self, preserve_status: bool = False) -> None:
-        if self.worker: self.worker.stop()
+        worker = self.worker
+        if worker:
+            worker.stop()
+            self._drain_events(worker)
+        if worker and worker.running:
+            self.session_status.set("Stopping source; waiting for the capture thread")
+            self.start_button.configure(state="disabled")
+            self.pause_button.configure(state="disabled")
+            self.stop_button.configure(state="disabled")
+            self._schedule_poll()
+            return
         self.worker = None
         if self._poll_id:
-            try: self.after_cancel(self._poll_id)
-            except tk.TclError: pass
+            try:
+                self.after_cancel(self._poll_id)
+            except tk.TclError:
+                pass
             self._poll_id = None
-        self.start_button.configure(state="normal"); self.pause_button.configure(state="disabled", text="Pause"); self.stop_button.configure(state="disabled")
-        if not preserve_status: self.session_status.set("Stopped")
+        self.start_button.configure(state="normal")
+        self.pause_button.configure(state="disabled", text="Pause")
+        self.stop_button.configure(state="disabled")
+        self._set_source_controls(True)
+        if not preserve_status:
+            self.session_status.set("Stopped")
 
     def _schedule_poll(self) -> None:
-        if self._poll_id is None: self._poll_id = self.after(30, self._poll)
+        if self._poll_id is None:
+            self._poll_id = self.after(30, self._poll)
+
+    def _drain_events(self, worker) -> None:
+        while True:
+            try:
+                event = worker.event_updates.get_nowait()
+            except queue.Empty:
+                return
+            self._persist_eligible_event(event)
 
     def _poll(self) -> None:
         self._poll_id = None
         worker = self.worker
-        if worker is None: return
-        latest = None
-        while True:
-            try: latest = worker.updates.get_nowait()
-            except queue.Empty: break
-        if latest is not None: self._apply_update(latest)
-        if self.worker is worker and worker.running: self._schedule_poll()
+        if worker is None:
+            return
+        try:
+            self._drain_events(worker)
+            while not worker.stop_event.is_set():
+                try:
+                    update = worker.updates.get_nowait()
+                except queue.Empty:
+                    break
+                self._apply_update(update)
+        finally:
+            if self.worker is worker:
+                if worker.running:
+                    self._schedule_poll()
+                else:
+                    self.stop(preserve_status=not worker.stop_event.is_set())
 
     def _apply_update(self, update: VideoUpdate) -> None:
         if update.frame_rgb is not None: self._show_frame(update.frame_rgb)
@@ -240,6 +296,8 @@ class VideoAnalysisPage(ScrollablePage):
         self.snake_warning.pack_forget()
 
     def _source_identity(self) -> tuple[str, str]:
+        if self._session_source is not None:
+            return self._session_source
         if self.source_mode.get() == "webcam":
             return "WEBCAM", f"Camera {self.camera_index.get()}"
         return "VIDEO", self.video_path.name if self.video_path else "Recorded Video"
@@ -247,16 +305,16 @@ class VideoAnalysisPage(ScrollablePage):
     def _persist_eligible_event(self, update: VideoUpdate) -> None:
         result = update.analysis
         if (result is None or update.gate is None or update.gate.decision != "WILDLIFE"
-                or self._last_frame is None or not update.episode_key):
+                or update.frame_rgb is None or not update.episode_key):
             return
         episode = (update.episode_key, result.predicted_class)
         if self._saved_stable_episode == episode:
             return
         source_type, source_name = self._source_identity()
-        video_time = f"{update.frames_captured/update.source_fps:.6f}" if source_type == "VIDEO" and update.source_fps > 0 else ""
+        video_time = f"{max(0, update.frames_captured - 1)/update.source_fps:.6f}" if source_type == "VIDEO" and update.source_fps > 0 else ""
         try:
             event = self.history.log_stable_frame(
-                Image.fromarray(self._last_frame), source_type=source_type, source_name=source_name,
+                Image.fromarray(update.frame_rgb), source_type=source_type, source_name=source_name,
                 episode_key=update.episode_key,
                 predicted_class=result.predicted_class, display_class=friendly_name(result.predicted_class),
                 category=CATEGORIES[result.predicted_class], confidence=result.confidence,
@@ -290,3 +348,6 @@ class VideoAnalysisPage(ScrollablePage):
 
     def close(self) -> None:
         self.stop()
+        if self._poll_id:
+            self.after_cancel(self._poll_id)
+            self._poll_id = None

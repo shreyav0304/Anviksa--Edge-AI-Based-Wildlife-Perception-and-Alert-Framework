@@ -11,6 +11,7 @@ from .base import ScrollablePage
 
 
 class HomePage(ScrollablePage):
+    MIN_CONTENT_WIDTH = 1120
     def __init__(self, parent: tk.Misc, data: DashboardData) -> None:
         super().__init__(parent)
         self.data = data

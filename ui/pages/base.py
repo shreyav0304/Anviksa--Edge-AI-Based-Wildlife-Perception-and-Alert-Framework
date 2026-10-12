@@ -20,9 +20,21 @@ class ScrollablePage(ttk.Frame):
         horizontal.grid(row=1, column=0, sticky="ew")
         self.content.bind("<Configure>", self._resize_content)
         self.canvas.bind("<Configure>", self._resize_content)
-        self.bind_all("<MouseWheel>", self._on_mousewheel, add="+")
-        self.bind_all("<Button-4>", self._on_mousewheel, add="+")
-        self.bind_all("<Button-5>", self._on_mousewheel, add="+")
+        root = self.winfo_toplevel()
+        if not getattr(root, "_page_wheel_bound", False):
+            root._page_wheel_bound = True
+            for sequence in ("<MouseWheel>", "<Button-4>", "<Button-5>"):
+                root.bind(sequence, self._route_mousewheel, add="+")
+
+    @staticmethod
+    def _route_mousewheel(event) -> None:
+        widget = event.widget.winfo_containing(event.x_root, event.y_root)
+        if isinstance(widget, (ttk.Treeview, ttk.Combobox, tk.Text, tk.Listbox)):
+            return
+        while widget is not None and not isinstance(widget, ScrollablePage):
+            widget = getattr(widget, "master", None)
+        if widget is not None:
+            widget._on_mousewheel(event)
 
     def _resize_content(self, _event=None) -> None:
         self.canvas.itemconfigure(self._window, width=max(self.canvas.winfo_width(), self.MIN_CONTENT_WIDTH))
