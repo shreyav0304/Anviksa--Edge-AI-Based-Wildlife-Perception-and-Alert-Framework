@@ -1,32 +1,99 @@
-# Anvīkṣa — Edge AI-Based Wildlife Perception and Alert Framework
+# Anvīkṣa - Edge AI-Based Wildlife Perception and Alert Framework
 
-Anvīkṣa AI is a final-year AI/ML and Edge AI project for offline wildlife perception near agricultural land, forest borders, and residential areas. It focuses on classifying snakes—including venomous and non-venomous snakes—and other wildlife from camera images while keeping inference suitable for an edge device.
+Anvīkṣa AI is an offline wildlife classification project for agricultural land, forest borders, and residential areas. It combines a validated MobileNetV3 Large classifier with a Tkinter dashboard, image/video analysis, Wildlife Gate pre-screening, and local detection history.
 
-## Problem statement
+**Software status:** dashboard and inference implemented; model validation and development-machine tests pass. **Physical Raspberry Pi validation and field hardware integration remain pending.**
 
-Wildlife entering human-used areas can threaten people, crops, livestock, and the animals themselves. Many field locations have unreliable connectivity, so Anvīkṣa is designed around local sensing, classification, alerting, and event storage instead of a cloud dependency.
+## Dashboard
 
-## Proposed system architecture
+Launch the desktop application with `python run_ui.py`. Its sidebar provides:
 
-```text
-mmWave radar (motion/presence trigger)
-                ↓
-Camera image or video frame
-                ↓
-Image preprocessing
-                ↓
-MobileNetV3 Large wildlife classifier
-                ↓
-Class + confidence → threat/decision logic
-                ↓
-LED/buzzer alert + local logging/image storage
+| Section | Features |
+| --- | --- |
+| Overview | Selected model, validated metrics, classes, and project status |
+| Image Analysis | Local image classification, class probabilities, confidence, and explicitly saved detections |
+| Video / Webcam | Recorded videos or USB webcam frames, Wildlife Gate pre-screening, probability smoothing, and stable sightings |
+| Model Comparison | Accuracy, precision, recall, F1, probability MSE, confidence, and snake-class performance |
+| Confusion Matrix | Separate columns for all models, raw counts or normalized percentages, and selected-model details |
+| Detection History | Local events, filters, snapshots, summaries, and CSV export |
+| System Deployment | Device information, model-file availability, integration status, and launch instructions |
+| About Project | Purpose, perception pipeline, classes, research results, and documentation |
+
+Navigation and page scrollbars keep these sections accessible on small displays. Desktop regression checks cover **800x480** and **480x320**. Pages load independently; a failed section shows its error and a Retry button while other sections remain available.
+
+Comparison pages read committed summaries and frozen prediction caches. Private historical training runs and dashboard regeneration are not required. EfficientNetB0 shows **N/A** because its controlled experiment was incomplete.
+
+## Raspberry Pi quick start
+
+The documented installation profile is **Raspberry Pi OS Bookworm 64-bit with Desktop and Python 3.11**. See [the full setup guide](docs/raspberry_pi_setup.md) for compatibility details and troubleshooting. The root requirements file targets this profile; do not apply it unchanged to other OS/Python combinations.
+
+From a terminal in the Pi desktop:
+
+```bash
+sudo apt install -y git git-lfs python3-pip python3-venv python3-tk
+
+# Skip large LFS source videos; they are not needed to run the dashboard.
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/shreyav0304/Anviksa--Edge-AI-Based-Wildlife-Perception-and-Alert-Framework.git
+cd Anviksa--Edge-AI-Based-Wildlife-Perception-and-Alert-Framework
+
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install --only-binary=:all: -r requirements.txt
+python -m pip check
+
+python -B pi_deployment/verify_package.py
+python -B scripts/check_dashboard.py
+python -B scripts/check_pi_dependencies.py
+python run_ui.py
 ```
 
-The mmWave radar is intended only to detect motion or presence and trigger the camera. Wildlife classification is performed by the camera and AI model. The final field concept targets a Raspberry Pi 4, Raspberry Pi Camera, LED, buzzer, rechargeable battery, charge controller, and solar panel.
+Use an active graphical desktop session; a plain SSH session has no display for Tkinter. The app uses headless OpenCV for capture and processing, and Pillow/Tkinter for display. Full TensorFlow is not required on the Pi.
 
-## Dataset and classes
+To update an existing clean checkout:
 
-The private working dataset is intentionally excluded from this public repository. The fixed model output order is:
+```bash
+git pull --ff-only origin main
+source .venv/bin/activate
+python -B scripts/check_dashboard.py
+python run_ui.py
+```
+
+For a USB webcam preview without model inference:
+
+```bash
+python pi_deployment/webcam_test.py --camera 0
+```
+
+Try another camera index if needed. Camera drivers, access permissions, codecs, and Pi performance require on-device checks.
+
+## Perception pipeline and limits
+
+```text
+Local image / recorded video / USB webcam
+                    |
+          RGB frame preprocessing
+                    |
+     Wildlife Gate (video/webcam only)
+                    |
+     MobileNetV3 Large classification
+                    |
+       Class, confidence, threat metadata
+                    |
+     Dashboard + local history/snapshots
+```
+
+Wildlife Gate rejects non-wildlife frames and pauses species classification when uncertain. Confident, stable video/webcam sightings are saved automatically; image detections are saved explicitly. Eligible events use a separate queue so dropped preview frames do not discard detection history.
+
+The seven-class model classifies a **whole frame**; it does not produce bounding boxes or identify individual animals. It has no Background/Unknown class. Gate decisions, confidence thresholds, and threat labels are application logic, not guarantees of species identification. Snake predictions require careful human verification.
+
+The proposed field hardware adds an mmWave presence trigger, Raspberry Pi camera, GPIO LED/buzzer alerts, rechargeable battery, charge controller, and solar panel. These integrations remain planned. The mmWave sensor would trigger capture; camera images provide the classification input.
+
+## Dataset and class order
+
+The original frozen wildlife training dataset and local integrity manifests are excluded from Git. The repository also contains supplemental snake-image/video material and related audit tools; these are separate from the original controlled experiment.
+
+The validated classifier's output order is fixed:
 
 1. Cow
 2. Deer
@@ -36,122 +103,97 @@ The private working dataset is intentionally excluded from this public repositor
 6. Venomous_Snake
 7. Wild_Boar
 
-The controlled experiments used frozen train, validation, and test manifests. The final test split contains 545 images. Dataset preparation and integrity utilities remain available in the source, but image data and local integrity reports are not published.
-
-## Preprocessing and offline inference
-
-Training and validated TFLite evaluation decode images as RGB, resize to `224 × 224` with nearest-neighbor interpolation, cast to Float32, and retain the external pixel range near `[0,255]`. MobileNetV3 normalization is embedded in the model; callers must not divide pixels by 255 or apply MobileNetV2 preprocessing.
-
-The Raspberry Pi package implements this exact shared input contract. The desktop application uses OpenCV for recorded videos and USB webcam frames, with Wildlife Gate pre-screening and local detection history. Physical camera validation on Raspberry Pi remains pending. The model itself runs completely offline through TensorFlow Lite.
+Completed baseline models were evaluated on the same **545-image frozen test split**. Training and dataset utilities require their corresponding local inputs and are not part of dashboard startup.
 
 ## Model comparison
 
-All completed models were evaluated on the same frozen test split.
-
 | Model | Test accuracy | Macro F1 | Status |
-|---|---:|---:|---|
+| --- | ---: | ---: | --- |
 | Custom CNN | 50.46% | 50.73% | Completed baseline |
 | MobileNetV2 | 92.48% | 95.20% | Completed transfer-learning baseline |
-| **MobileNetV3 Large** | **95.41%** | **96.87%** | **Selected model** |
-| EfficientNetB0 | — | — | Attempted; excluded from ranking because training could not complete with available computational resources |
+| **MobileNetV3 Large** | **95.41%** | **96.87%** | **Selected deployment architecture** |
+| EfficientNetB0 | N/A | N/A | Incomplete; excluded from ranking |
 
-The selected MobileNetV3 Large model achieved:
+MobileNetV3 Large achieved **92.91% venomous-snake recall** and **92.16% snake macro recall**. Its frozen-test confusion matrix contains **520 correct predictions out of 545**.
 
-- Test accuracy: **95.41%**
-- Macro F1: **96.87%**
-- Venomous Snake recall: **92.91%**
-- Snake Macro Recall: **92.16%**
-
-Detailed comparison tables and plots are available in [`results/comparison`](results/comparison/). EfficientNetB0 has no fabricated or partial test score in the ranking.
+See [comparison results](results/comparison/) and [dashboard artifacts](results/model_comparison_dashboard/) for tables, plots, and prediction caches. Additional V2/V3/video-training experiments in the repository do not replace the validated **MobileNetV3 Large V1 Float32 TFLite** model used by the app.
 
 ## TensorFlow Lite deployment
 
-Two byte-verified deployment representations are included:
-
-| Representation | Size | Test accuracy | Prediction agreement |
-|---|---:|---:|---|
+| Representation | Model size | Test accuracy | Frozen-test prediction agreement |
+| --- | ---: | ---: | --- |
 | Float32 TFLite | 12.32 MiB | 95.41% | 545/545 with Keras |
-| Float16 TFLite | 6.25 MiB | 95.41% | 545/545 with both Keras and Float32 |
+| Float16 TFLite | 6.25 MiB | 95.41% | 545/545 with Keras and Float32 |
 
-Float16 preserves the complete test-set classification result while reducing storage by approximately 49.31% relative to Float32. Validation artifacts are under [`results/deployment`](results/deployment/), and the deployable models are under [`pi_deployment/models`](pi_deployment/models/).
+Float16 reduces storage by approximately **49.31%**. The current dashboard uses Float32; choosing the preferred representation on the Pi awaits physical benchmarking.
 
-Windows CPU timing measurements in the validation artifacts are development-machine measurements. They are **not Raspberry Pi performance results** and should not be used to claim Pi throughput.
+The species classifier expects RGB images resized to **224 x 224** with nearest-neighbor interpolation, Float32 dtype, and pixels in **[0, 255]**. Normalization is embedded in the model: do not divide pixels by 255 or apply MobileNetV2 preprocessing. Wildlife Gate has its own preprocessing implementation.
 
-## Raspberry Pi benchmark package
+Deployed files are in [pi_deployment/models/](pi_deployment/models/); conversion metrics and matrices are in [results/deployment/](results/deployment/). Model integrity, exact class order, input tensors, and output probabilities are checked by the runtime and diagnostics.
 
-[`pi_deployment`](pi_deployment/) contains:
+Development-machine timing measurements are **not Raspberry Pi performance measurements**. For separate model-only and end-to-end benchmarks using 1, 2, and 4 threads, follow [the benchmark guide](pi_deployment/README_PI.md). Compare all six configurations using the same image, device, and measurement protocol.
 
-- Both validated TFLite models and their SHA-256 manifest
-- Reusable single-image TFLite inference
-- Separate model-only and end-to-end benchmarking
-- 1, 2, and 4-thread configurations
-- Memory, temperature, system-information, and stability recording
-- Six-configuration result comparison
-- Package-integrity verification
+## Detection history
 
-See [`README_PI.md`](pi_deployment/README_PI.md) for setup and benchmark commands. No Raspberry Pi benchmark has been performed yet, so the final choice between Float32 and Float16 on the target device remains pending.
+Events and snapshots are stored locally in `results/detection_history/`, which is excluded from Git and separate from training data. A new Pi starts with an empty history.
 
-## Project structure
+The viewer supports filtering, snapshot inspection, and export to a separate CSV. It protects the master history from export overwrite and reports skipped malformed rows. Older history files without optional video frame/time fields remain readable and appendable.
 
-```text
-experiments/                 Reproducible model registry, data pipeline, training, and evaluation
-pi_deployment/               Raspberry Pi inference and benchmark package
-results/comparison/          Valid model comparison tables and plots
-results/deployment/          Float32/Float16 validation metrics and confusion matrices
-inference_engine.py          Existing desktop inference component
-dataset_integrity.py         Dataset integrity and leakage audit tooling
-train.py                     Controlled experiment entry point
-convert_validate_float*.py   Reproducible TFLite conversion and numerical validation
-```
+History counts represent runtime detections, not accuracy, precision, recall, or F1.
 
-## Current status
+## Health checks and regression tests
 
-- Dataset preparation and integrity checking: complete locally
-- Custom CNN, MobileNetV2, and MobileNetV3 Large comparison: complete
-- MobileNetV3 Large selection: complete
-- Float32 and Float16 TFLite numerical validation: complete
-- Offline Raspberry Pi inference/benchmark package: prepared
-- Physical Raspberry Pi benchmarking: **pending**
-- Image/video/USB webcam dashboard and detection history: implemented; **physical Pi validation pending**
-- mmWave trigger integration: **pending**
-- GPIO LED/buzzer integration: **pending**
-- Solar-powered field integration: **concept/planned**
-
-The repository currently represents a validated AI model and deployment-preparation stage, not a completed field-hardware prototype.
-
-## Quick package verification
+From the activated app environment:
 
 ```bash
-cd pi_deployment
-python verify_package.py
-```
-
-For Raspberry Pi environment setup and benchmarking, follow [`pi_deployment/README_PI.md`](pi_deployment/README_PI.md).
-
-## Desktop dashboard
-
-The offline Tkinter app provides Overview, Image Analysis, Video/Webcam,
-Model Comparison, Confusion Matrix, Detection History, System Deployment,
-and About Project. Pages load independently so a missing camera/plotting
-dependency does not block the remaining sections. All-model confusion matrices
-have separate columns, with scrollbars for small displays.
-
-On the supported Raspberry Pi desktop, follow
-[the setup guide](docs/raspberry_pi_setup.md), activate the app environment, then:
-
-```bash
-python run_ui.py
+python -B pi_deployment/verify_package.py
 python -B scripts/check_dashboard.py
+python -B scripts/check_pi_dependencies.py
 python -B -m unittest discover -s tests -v
 ```
 
-To include desktop regression checks, run from a graphical login:
+The package/dashboard checks read artifacts without running models or opening hardware. The dependency check probes imports. Regression tests use temporary files and simulated camera behavior.
+
+Include desktop tests from an active graphical login:
 
 ```bash
 ANVIKSA_GUI_TESTS=1 python -B -m unittest discover -s tests -v
 ```
 
-Runtime history stays in results/detection_history/ and is excluded from Git.
-Model binaries, training data, and validated experiment results are not modified
-by these checks. See [the checkup report](docs/checkup_report.md) for tested scope
-and outstanding hardware validation.
+The [12 October 2026 checkup report](docs/checkup_report.md) records:
+
+- 90 Python sources and 64 tracked JSON artifacts validated.
+- 27 regression checks passed on Windows, including five desktop checks.
+- 22 non-GUI checks passed under Linux.
+- Float32, Float16, and Wildlife Gate model hashes verified.
+- Real Linux CPU inference and a temporary six-frame video pipeline passed.
+
+These checks do not establish physical Pi installation, camera reliability, thermal behavior, memory use, or throughput.
+
+## Project structure
+
+```text
+run_ui.py                           Desktop dashboard entry point
+ui/app.py                           Navigation, styles, page loading, and error reporting
+ui/pages/                           Dashboard sections
+ui/services/                        Data, inference, video, gate, and history services
+scripts/check_dashboard.py          Published-artifact and model-integrity checks
+scripts/check_pi_dependencies.py    Isolated dependency probes
+tests/                              Runtime and optional desktop regression checks
+requirements.txt                    Supported Raspberry Pi app dependencies
+pi_deployment/                      TFLite models, inference, benchmarks, and webcam test
+wildlife_gate/                      Video/webcam pre-screening model and research scripts
+experiments/                        Controlled training and evaluation utilities
+results/comparison/                 Baseline comparison tables and plots
+results/model_comparison_dashboard/ Dashboard summaries and prediction caches
+results/deployment/                 TFLite validation metrics and matrices
+snake_video_dataset/                Video collection, review, and dataset utilities
+docs/                               Setup, validation, and reference documentation
+inference_engine.py                 Legacy MobileNetV2 Keras inference component
+train.py                            Controlled experiment entry point
+convert_validate_float*.py          Reproducible TFLite conversion and validation
+```
+
+## Remaining work
+
+Physical Raspberry Pi installation, display/camera testing, and benchmarking remain pending. mmWave triggers, GPIO alerts, and solar-powered field deployment remain planned. This repository contains validated models and implemented desktop software; it is not yet a fully validated field-hardware prototype.
