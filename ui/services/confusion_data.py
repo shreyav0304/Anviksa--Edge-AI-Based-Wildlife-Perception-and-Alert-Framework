@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .comparison_data import COMPLETED_RUNS
+from .comparison_data import COMPLETED_RUNS, PROJECT_ROOT
 
 
 CLASS_NAMES = (
@@ -62,12 +62,35 @@ def _interpret(model: str, accuracy: float, off_diagonal: int, snake_errors: int
 
 def load_confusion_records() -> dict[str, ConfusionMatrixRecord]:
     """Load matrices and metrics only; no image access or model execution."""
+    with (PROJECT_ROOT / "results/comparison/final_valid_model_comparison.csv").open(
+        newline="", encoding="utf-8"
+    ) as handle:
+        summaries = {row["Model"]: row for row in csv.DictReader(handle)}
     records: dict[str, ConfusionMatrixRecord] = {}
     nonvenomous = CLASS_NAMES.index("Non_Venomous_Snake")
     venomous = CLASS_NAMES.index("Venomous_Snake")
     for model, run in COMPLETED_RUNS.items():
-        raw = _load_matrix(run / "confusion_matrix_raw.csv", int).astype(np.int64)
-        normalized = _load_matrix(run / "confusion_matrix_normalized.csv", float).astype(np.float64)
+        if (run / "confusion_matrix_raw.csv").is_file():
+            raw = _load_matrix(run / "confusion_matrix_raw.csv", int).astype(np.int64)
+            normalized = _load_matrix(run / "confusion_matrix_normalized.csv", float).astype(np.float64)
+        else:
+            slug = {"Custom CNN": "custom_cnn", "MobileNetV2": "mobilenet_v2",
+                    "MobileNetV3 Large": "mobilenet_v3_large"}[model]
+            cache = PROJECT_ROOT / "results/model_comparison_dashboard" / f"prediction_probabilities_{slug}.npz"
+            with np.load(cache, allow_pickle=False) as saved:
+                labels = saved["true_labels"]
+                probabilities = saved["probabilities"]
+            if labels.shape != (545,) or probabilities.shape != (545, 7):
+                raise ValueError(f"Invalid published prediction shapes for {model}")
+            if not np.isfinite(probabilities).all() or np.any(probabilities < 0) or np.any(probabilities > 1):
+                raise ValueError(f"Invalid published probabilities for {model}")
+            if not np.allclose(probabilities.sum(axis=1), 1, atol=1e-5):
+                raise ValueError(f"Published probability rows do not sum to one for {model}")
+            if not np.issubdtype(labels.dtype, np.integer) or np.any(labels < 0) or np.any(labels >= 7):
+                raise ValueError(f"Invalid published class labels for {model}")
+            raw = np.zeros((7, 7), dtype=np.int64)
+            np.add.at(raw, (labels, probabilities.argmax(axis=1)), 1)
+            normalized = raw / raw.sum(axis=1, keepdims=True)
         total = int(raw.sum())
         correct = int(np.trace(raw))
         incorrect = total - correct
@@ -78,8 +101,19 @@ def load_confusion_records() -> dict[str, ConfusionMatrixRecord]:
         expected_normalized = raw / raw.sum(axis=1, keepdims=True)
         if not np.allclose(normalized, expected_normalized, rtol=0, atol=1e-12):
             raise ValueError(f"{model} normalized matrix does not match validated row normalization")
-        with (run / "metrics.json").open(encoding="utf-8") as handle:
-            historical = json.load(handle)
+        if (run / "metrics.json").is_file():
+            with (run / "metrics.json").open(encoding="utf-8") as handle:
+                historical = json.load(handle)
+        else:
+            summary = summaries[model]
+            historical = {
+                "test_accuracy": float(summary["Test Accuracy"]),
+                "macro_precision": float(summary["Macro Precision"]),
+                "macro_recall": float(summary["Macro Recall"]),
+                "macro_f1": float(summary["Macro F1"]),
+                "venomous_snake": {"recall": float(summary["Venomous Snake Recall"])},
+                "snake_macro_recall": float(summary["Snake Macro Recall"]),
+            }
         matrix_accuracy = correct / total
         if not np.isclose(matrix_accuracy, historical["test_accuracy"], rtol=0, atol=1e-12):
             raise ValueError(f"{model} matrix accuracy differs from historical accuracy")

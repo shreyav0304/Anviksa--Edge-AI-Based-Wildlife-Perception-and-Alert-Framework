@@ -39,7 +39,14 @@ def _read_json(path: Path) -> dict:
 
 def load_dashboard_data() -> DashboardData:
     """Load dashboard values without importing or evaluating an ML model."""
-    metrics = _read_json(SELECTED_RUN / "metrics.json")
+    if (SELECTED_RUN / "metrics.json").is_file():
+        metrics = _read_json(SELECTED_RUN / "metrics.json")
+    else:
+        from .services.comparison_data import load_comparison_records
+        selected = next(record for record in load_comparison_records() if record.model == "MobileNetV3 Large")
+        metrics = {"model_name": selected.model, "test_accuracy": selected.accuracy,
+                   "macro_f1": selected.macro_f1, "venomous_snake": {"recall": selected.venomous_recall},
+                   "snake_macro_recall": selected.snake_macro_recall}
     deployment = _read_json(DEPLOYMENT_MANIFEST)
     classes = tuple(deployment["class_order"])
     models = deployment["models"]

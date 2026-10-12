@@ -11,7 +11,7 @@ from ui.pages.video_analysis import VideoAnalysisPage
 from ui.pages.model_comparison import ModelComparisonPage
 from ui.pages.confusion_matrix import ConfusionMatrixPage
 from ui.pages.detection_history import DetectionHistoryPage
-from ui.pages.placeholder import PlaceholderPage
+from ui.pages.project_info import ProjectInfoPage
 from ui.services.detection_history import DetectionHistoryService
 
 
@@ -20,8 +20,10 @@ class AnviksaApp(tk.Tk):
         super().__init__()
 
         self.title("ANVĪKṢA AI")
-        self.geometry("1180x720")
-        self.minsize(1000, 650)
+        width = min(1180, self.winfo_screenwidth())
+        height = min(720, max(320, self.winfo_screenheight() - 60))
+        self.geometry(f"{width}x{height}+0+0")
+        self.minsize(480, 320)
 
         self.protocol("WM_DELETE_WINDOW", self.close)
 
@@ -77,13 +79,13 @@ class AnviksaApp(tk.Tk):
         style.configure(
             "Nav.TButton",
             font=("Segoe UI", 10),
-            padding=(12, 8),
+            padding=(8, 4),
         )
 
         style.configure(
             "Active.Nav.TButton",
             font=("Segoe UI", 10, "bold"),
-            padding=(12, 8),
+            padding=(8, 4),
         )
 
     def _build_layout(self) -> None:
@@ -105,7 +107,7 @@ class AnviksaApp(tk.Tk):
         header.pack(
             fill="x",
             padx=14,
-            pady=(18, 15),
+            pady=(8, 6),
         )
 
         ttk.Label(
@@ -131,13 +133,26 @@ class AnviksaApp(tk.Tk):
             ("comparison", "Model Comparison"),
             ("confusion", "Confusion Matrix"),
             ("history", "Detection History"),
-            ("system", "System / Deployment"),
+            ("system", "System Deployment"),
             ("about", "About Project"),
         ]
 
+        nav_host = ttk.Frame(sidebar, style="Sidebar.TFrame")
+        nav_host.pack(fill="both", expand=True)
+        nav_canvas = tk.Canvas(nav_host, bg="#153a2f", highlightthickness=0, width=190)
+        nav_scroll = ttk.Scrollbar(nav_host, orient="vertical", command=nav_canvas.yview)
+        nav_scroll.pack(side="right", fill="y")
+        nav_canvas.pack(side="left", fill="both", expand=True)
+        nav_canvas.configure(yscrollcommand=nav_scroll.set)
+        nav_frame = ttk.Frame(nav_canvas, style="Sidebar.TFrame")
+        nav_window = nav_canvas.create_window((0, 0), window=nav_frame, anchor="nw")
+        nav_frame.bind("<Configure>", lambda _event: nav_canvas.configure(scrollregion=nav_canvas.bbox("all")))
+        nav_canvas.bind("<Configure>", lambda event: nav_canvas.itemconfigure(nav_window, width=event.width))
+        nav_canvas.bind("<Button-4>", lambda _event: nav_canvas.yview_scroll(-1, "units"))
+        nav_canvas.bind("<Button-5>", lambda _event: nav_canvas.yview_scroll(1, "units"))
         for key, label in nav_items:
             button = ttk.Button(
-                sidebar,
+                nav_frame,
                 text=label,
                 style="Nav.TButton",
                 command=lambda page_key=key: self.show_page(page_key),
@@ -360,29 +375,8 @@ class AnviksaApp(tk.Tk):
         # ============================================================
         # PLACEHOLDER PAGES
         # ============================================================
-        placeholders = {
-            "system": (
-                "System / Deployment",
-                (
-                    "Raspberry Pi, camera, mmWave, LED, buzzer, and hardware "
-                    "integration status can be validated here during deployment."
-                ),
-            ),
-            "about": (
-                "About Project",
-                (
-                    "Anvīkṣa AI is an offline Edge AI wildlife perception, "
-                    "classification, and alert framework."
-                ),
-            ),
-        }
-
-        for key, (title, description) in placeholders.items():
-            self._pages[key] = PlaceholderPage(
-                self.page_host,
-                title,
-                description,
-            )
+        for key, title in (("system", "System Deployment"), ("about", "About Project")):
+            self._pages[key] = ProjectInfoPage(self.page_host, title, self.history_service.root)
 
         # ============================================================
         # PLACE ALL PAGES IN SAME CONTAINER

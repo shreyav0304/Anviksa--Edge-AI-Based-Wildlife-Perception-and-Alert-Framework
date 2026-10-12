@@ -17,11 +17,12 @@ from .base import ScrollablePage
 
 
 class ConfusionMatrixPage(ScrollablePage):
+    MIN_CONTENT_WIDTH = 1700
     def __init__(self, parent: tk.Misc, records: dict[str, ConfusionMatrixRecord], navigate: Callable[[str], None]) -> None:
         super().__init__(parent)
         self.records = records
         self.navigate = navigate
-        self.model_var = tk.StringVar(value="MobileNetV3 Large")
+        self.model_var = tk.StringVar(value=next(iter(records)))
         self.view_var = tk.StringVar(value="raw")
         self.metric_vars: dict[str, tk.StringVar] = {}
         self.summary_vars: dict[str, tk.StringVar] = {}
@@ -45,7 +46,9 @@ class ConfusionMatrixPage(ScrollablePage):
         ttk.Radiobutton(controls, text="Normalized %", variable=self.view_var, value="normalized", command=self.refresh).pack(side="left", padx=4)
         ttk.Label(controls, text="EfficientNetB0: Confusion Matrix — N/A (controlled experiment incomplete)", style="Incomplete.Status.TLabel").pack(side="right")
 
-        matrix_card = SectionCard(self.content, "Confusion matrix"); matrix_card.pack(fill="x")
+        self._build_all_models()
+
+        matrix_card = SectionCard(self.content, "Selected model details"); matrix_card.pack(fill="x")
         self.figure = Figure(figsize=(9.6, 6.2), dpi=100, facecolor="#ffffff")
         self.axis = self.figure.add_subplot(111)
         self.chart = FigureCanvasTkAgg(self.figure, master=matrix_card)
@@ -61,6 +64,45 @@ class ConfusionMatrixPage(ScrollablePage):
         ttk.Label(note, text="Rows represent actual classes and columns represent predicted classes. Values on the diagonal are correct classifications, while off-diagonal values represent misclassifications. In normalized view, each row shows the percentage distribution of predictions for one actual class.", style="Body.TLabel", wraplength=1050).pack(anchor="w")
         ttk.Button(note, text="Back to Model Comparison", command=lambda: self.navigate("comparison")).pack(anchor="w", pady=(10, 0))
         self.refresh()
+
+    def _build_all_models(self) -> None:
+        card = SectionCard(self.content, "All models - separate columns")
+        card.pack(fill="x", pady=(0, 12))
+        ttk.Label(card, text="Use the horizontal scrollbar below to view every model on a small display.", style="Muted.TLabel").pack(anchor="w")
+        self.all_figure = Figure(figsize=(16, 4.8), dpi=100, facecolor="white")
+        self.all_chart = FigureCanvasTkAgg(self.all_figure, master=card)
+        self.all_chart.get_tk_widget().configure(width=1600, height=480, highlightthickness=0)
+        self.all_chart.get_tk_widget().pack(fill="x")
+
+    def _render_all_models(self, normalized: bool) -> None:
+        self.all_figure.clear()
+        names = ("Custom CNN", "MobileNetV2", "MobileNetV3 Large", "EfficientNetB0")
+        for index, name in enumerate(names, 1):
+            axis = self.all_figure.add_subplot(1, len(names), index)
+            axis.set_title(name, fontsize=11, fontweight="bold")
+            record = self.records.get(name)
+            if record is None:
+                axis.text(.5, .5, "N/A\nExperiment incomplete" if name == "EfficientNetB0" else "Matrix unavailable",
+                          ha="center", va="center", transform=axis.transAxes)
+                axis.set_axis_off()
+                continue
+            matrix = record.normalized if normalized else record.raw
+            axis.imshow(matrix, cmap="Blues", vmin=0, vmax=1 if normalized else None)
+            labels = [friendly_name(name) for name in CLASS_NAMES]
+            axis.set(xticks=np.arange(7), yticks=np.arange(7), xticklabels=labels, yticklabels=labels,
+                     xlabel="Predicted class", ylabel="Actual class")
+            axis.tick_params(axis="x", rotation=65, labelsize=7)
+            axis.tick_params(axis="y", labelsize=7)
+            for label in axis.get_xticklabels():
+                label.set_ha("right")
+            threshold = float(matrix.max()) / 2
+            for row in range(7):
+                for column in range(7):
+                    value = f"{matrix[row, column] * 100:.0f}%" if normalized else str(int(matrix[row, column]))
+                    axis.text(column, row, value, ha="center", va="center", fontsize=6,
+                              color="white" if matrix[row, column] > threshold else "#20332b")
+        self.all_figure.tight_layout(pad=1.5)
+        self.all_chart.draw_idle()
 
     def _metrics_panel(self, parent: tk.Misc) -> ttk.Frame:
         card = SectionCard(parent, "Validated model metrics")
@@ -87,6 +129,7 @@ class ConfusionMatrixPage(ScrollablePage):
         record = self.records[self.model_var.get()]
         normalized = self.view_var.get() == "normalized"
         matrix = record.normalized if normalized else record.raw
+        self._render_all_models(normalized)
         self._render(record.model, matrix, normalized)
         for key, variable in self.metric_vars.items(): variable.set(self._pct(record.metrics[key]))
         source, target, count = record.largest_confusion

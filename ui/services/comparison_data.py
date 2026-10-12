@@ -56,13 +56,30 @@ def load_comparison_records() -> tuple[ModelComparisonRecord, ...]:
     if tuple(row["Model"] for row in rows) != expected_models:
         raise ValueError("Comparison model order does not match validated artifacts")
 
+    # Published summaries travel with a clean clone; historical runs are gitignored.
+    with (PROJECT_ROOT / "results/comparison/final_valid_model_comparison.csv").open(
+        newline="", encoding="utf-8"
+    ) as handle:
+        summaries = {row["Model"]: row for row in csv.DictReader(handle)}
     snake_f1: dict[str, float] = {}
-    for model, run in COMPLETED_RUNS.items():
-        metrics = _read_json(run / "metrics.json")
-        config = _read_json(run / "config.json")
-        if metrics["dataset_fingerprint"] != EXPECTED_FINGERPRINT or config["dataset_fingerprint"] != EXPECTED_FINGERPRINT:
-            raise ValueError(f"Dataset fingerprint mismatch for {model}")
-        snake_f1[model] = float(metrics["snake_macro_f1"])
+    for row in rows:
+        model = row["Model"]
+        if model not in COMPLETED_RUNS:
+            continue
+        run = COMPLETED_RUNS[model]
+        if (run / "metrics.json").is_file() and (run / "config.json").is_file():
+            metrics = _read_json(run / "metrics.json")
+            config = _read_json(run / "config.json")
+            if metrics["dataset_fingerprint"] != EXPECTED_FINGERPRINT or config["dataset_fingerprint"] != EXPECTED_FINGERPRINT:
+                raise ValueError(f"Dataset fingerprint mismatch for {model}")
+            snake_f1[model] = float(metrics["snake_macro_f1"])
+        else:
+            summary = summaries[model]
+            for field, source in (("Accuracy", "Test Accuracy"), ("Macro_Precision", "Macro Precision"),
+                                  ("Macro_Recall", "Macro Recall"), ("Macro_F1", "Macro F1")):
+                if abs(float(row[field]) - float(summary[source])) > 1e-9:
+                    raise ValueError(f"Published comparison mismatch for {model}: {field}")
+            snake_f1[model] = float(summary["Snake Macro F1"])
 
     records: list[ModelComparisonRecord] = []
     for row in rows:

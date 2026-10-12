@@ -231,3 +231,29 @@ for above. No inference implementation, UI, historical requirements, models,
 datasets, video data or experiment results are changed by this preparation.
 No packages are installed on the Windows development PC. Successful installation
 and physical Pi testing remain deployment steps, not claimed results here.
+
+## Dashboard visibility on smaller Raspberry Pi displays
+
+Update the complete repository (not just the pi_deployment folder), then launch
+from the Raspberry Pi OS desktop terminal:
+
+```bash
+git pull --ff-only origin main
+source .venv/bin/activate
+python run_ui.py
+```
+
+The sidebar includes Model Comparison, Confusion Matrix, Detection History,
+System Deployment, and About Project. Short displays have a sidebar scrollbar;
+pages also have vertical and horizontal scrollbars. Linux mouse-wheel scrolling
+is supported. Confusion Matrix shows one column per model, with raw/normalized
+views and selected-model details. EfficientNetB0 remains N/A because its
+experiment was incomplete.
+
+A clean clone reads published comparison summaries and reconstructs matrices
+from the committed frozen prediction caches; ignored historical training runs,
+training datasets, TensorFlow, and dashboard regeneration are not required.
+Keep results/comparison/ and results/model_comparison_dashboard/ in the clone.
+Detection history starts empty on a new Pi and fills as local analyses are saved.
+System Deployment shows local model-file availability and integration status;
+About Project contains the project description and validated research results.
