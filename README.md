@@ -8,7 +8,7 @@ Anvīkṣa AI is an offline wildlife classification project for agricultural lan
 
 The app now uses the supplied October 2026 15-class MobileNetV3 Large Float32 export. Full-test CPU inference on all 670 hash-verified test images measured **620/670 correct (92.54% accuracy)** and **91.77% Macro F1**. Float16 measured 621/670 (92.69%). The earlier seven-class results below are historical baselines on a different test set. See [the active-model validation report](docs/active_model_validation.md).
 
-The local dataset copy is in `datasets/Anviksa_15Class_Dataset` (4,692 train / 667 validation / 670 test images; all 6,029 copies verified). Images are excluded from Git; the UI includes a portable class/split inventory and an Open dataset folder button when images are installed.
+The local dataset copy is in `datasets/Anviksa_15Class_Dataset` (4,692 train / 667 validation / 670 test images; all 6,029 copies verified). Images are versioned with Git LFS; the UI includes a portable class/split inventory and an Open dataset folder button when images are installed. If you cloned with LFS downloads skipped, fetch just this dataset with `git lfs pull --include="datasets/Anviksa_15Class_Dataset/**" --exclude=""`.
 
 ## Dashboard
 
@@ -40,7 +40,7 @@ From a terminal in the Pi desktop:
 ```bash
 sudo apt install -y git git-lfs python3-pip python3-venv python3-tk
 
-# Skip large LFS source videos; they are not needed to run the dashboard.
+# Skip LFS source videos and dataset images; they are not needed to run the dashboard.
 GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/shreyav0304/Anviksa--Edge-AI-Based-Wildlife-Perception-and-Alert-Framework.git
 cd Anviksa--Edge-AI-Based-Wildlife-Perception-and-Alert-Framework
 

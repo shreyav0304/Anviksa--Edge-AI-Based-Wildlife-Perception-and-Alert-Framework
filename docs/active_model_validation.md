@@ -48,7 +48,7 @@ Scores close to one keep six decimal places; exact one is displayed as `1.0 (sat
 
 - Path decoding uses OpenCV imdecode, BGR-to-RGB conversion, INTER_LINEAR resize to 224 by 224, Float32 pixels in [0,255], and embedded model rescaling. RGB frame inputs use the same resize. No external division by 255 is applied.
 - The older Wildlife Gate is bypassed for this classifier because its coverage has not been validated for the expanded domestic-animal classes. The UI explicitly reports this. No Background/Unknown output exists.
-- The dataset is copied to `datasets/Anviksa_15Class_Dataset`: 4,692 train, 667 validation, 670 test files, all 6,029 copies SHA-256 verified. These are original source counts; reviewed training exclusions remain documented in the training run. Raw images are excluded from Git. The app bundles the class/split inventory for Pi installations without local dataset images.
+- The dataset is copied to `datasets/Anviksa_15Class_Dataset`: 4,692 train, 667 validation, 670 test files, all 6,029 copies SHA-256 verified. These are original source counts; reviewed training exclusions remain documented in the training run. Raw dataset images are tracked through Git LFS. The app bundles the class/split inventory for Pi installations without local dataset images.
 - Dataset inventory, current class names, accuracy, and raw-score semantics are shown in the project information pages. Historical detection events are preserved.
 
 ## Remaining platform verification
