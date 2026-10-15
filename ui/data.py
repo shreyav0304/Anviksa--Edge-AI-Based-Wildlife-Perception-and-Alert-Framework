@@ -2,19 +2,7 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
-from pathlib import Path
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SELECTED_RUN = (
-    PROJECT_ROOT
-    / "results"
-    / "mobilenet_v3_large"
-    / "20260830T171150Z_94069968"
-)
-DEPLOYMENT_MANIFEST = PROJECT_ROOT / "pi_deployment" / "model_manifest.json"
 
 
 @dataclass(frozen=True)
@@ -28,37 +16,26 @@ class DashboardData:
     snake_macro_recall: float
     deployment_candidates: str
     pi_benchmark_status: str
-
-
-def _read_json(path: Path) -> dict:
-    if not path.is_file():
-        raise FileNotFoundError(f"Validated project artifact not found: {path}")
-    with path.open(encoding="utf-8") as handle:
-        return json.load(handle)
+    test_images: int
+    correct: int
+    mean_confidence: float
+    median_confidence: float
+    accuracy_interval: tuple[float, float]
 
 
 def load_dashboard_data() -> DashboardData:
-    """Load dashboard values without importing or evaluating an ML model."""
-    if (SELECTED_RUN / "metrics.json").is_file():
-        metrics = _read_json(SELECTED_RUN / "metrics.json")
-    else:
-        from .services.comparison_data import load_comparison_records
-        selected = next(record for record in load_comparison_records() if record.model == "MobileNetV3 Large")
-        metrics = {"model_name": selected.model, "test_accuracy": selected.accuracy,
-                   "macro_f1": selected.macro_f1, "venomous_snake": {"recall": selected.venomous_recall},
-                   "snake_macro_recall": selected.snake_macro_recall}
-    deployment = _read_json(DEPLOYMENT_MANIFEST)
-    classes = tuple(deployment["class_order"])
-    models = deployment["models"]
-    representations = " / ".join(model["representation"] for model in models)
+    """Use the selected export's recomputed evaluation, never a historical run."""
+    from .services.evaluation import load_active_evaluation
+    measured = load_active_evaluation()
+    classes = measured["classes"]
+    recalls = {row["name"]: row["recall"] for row in measured["per_class"]}
     return DashboardData(
-        selected_model=str(metrics["model_name"]),
-        deployment_format="TensorFlow Lite",
-        classes=classes,
-        accuracy=float(metrics["test_accuracy"]),
-        macro_f1=float(metrics["macro_f1"]),
-        venomous_recall=float(metrics["venomous_snake"]["recall"]),
-        snake_macro_recall=float(metrics["snake_macro_recall"]),
-        deployment_candidates=representations,
-        pi_benchmark_status=str(deployment["raspberry_pi_benchmark_status"]),
+        selected_model="MobileNetV3 Large (15 classes)", deployment_format="TensorFlow Lite Float32",
+        classes=classes, accuracy=measured["accuracy"], macro_f1=measured["macro_f1"],
+        venomous_recall=recalls["Venomous_Snake"],
+        snake_macro_recall=(recalls["Venomous_Snake"]+recalls["Non_Venomous_Snake"])/2,
+        deployment_candidates="Float32 / Float16", pi_benchmark_status="Pending hardware benchmarking",
+        test_images=measured["total"], correct=measured["correct"],
+        mean_confidence=measured["mean_confidence"], median_confidence=measured["median_confidence"],
+        accuracy_interval=measured["accuracy_interval"],
     )

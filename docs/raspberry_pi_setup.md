@@ -194,15 +194,13 @@ applicable), logging out/in after any group change. Do not run ANVIKSA as root.
    ```
    It must report `"pass": true`. Expected SHA-256 values:
    ```text
-   pi_deployment/models/mobilenet_v3_large_float32.tflite
-   086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7
-   pi_deployment/models/mobilenet_v3_large_float16.tflite
-   5b9e7763e605c7e5f8081dcf12c2ff6afd1cb1d7cd0f6f3cda909e07d1e7c4e5
+   pi_deployment/models/anviksa_15class_float32.tflite
+   36494a90660ac550e1e6db753861a8024d14eefd2c23e229d955f70673b6585a
+   pi_deployment/models/anviksa_15class_float16.tflite
+   46109f6b5702fd4927d94fd6a5688dce172f48f9ce05e20a735af093e722bf6c
    ```
 10. The same verifier checks `pi_deployment/inference/class_names.json` and the
-    manifest against the exact order: `Cow`, `Deer`, `Elephant`, `Monkey`,
-    `Non_Venomous_Snake`, `Venomous_Snake`, `Wild_Boar`. Do not replace this with a
-    V2/V3 class file or reorder labels.
+    manifest against the exact 15-class order in the supplied October training run: `Big_Cat`, `Cat`, `Chicken`, `Cow`, `Deer`, `Dog`, `Elephant`, `Goat`, `Monkey`, `Mouse`, `Non_Venomous_Snake`, `Pig`, `Sheep`, `Venomous_Snake`, `Wild_Boar`. Do not reorder labels.
 11. Run the dependency smoke test:
     ```bash
     python -B scripts/check_pi_dependencies.py
@@ -287,3 +285,5 @@ wheel):
 An older local history CSV without the optional video frame/time columns can
 still be read and appended. Export filtered records to a separate filename;
 the app prevents overwriting its master history file.
+
+The active model is the 15-class Float32 export. Full-test Linux CPU accuracy is 620/670 (92.54%); Float16 is 621/670 (92.69%). These are not physical Pi performance results. The older Wildlife Gate is bypassed pending expanded-class validation. See `docs/active_model_validation.md` in the repository.

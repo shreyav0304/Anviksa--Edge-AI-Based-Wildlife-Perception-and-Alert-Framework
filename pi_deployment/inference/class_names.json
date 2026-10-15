@@ -1,9 +1,17 @@
 [
+  "Big_Cat",
+  "Cat",
+  "Chicken",
   "Cow",
   "Deer",
+  "Dog",
   "Elephant",
+  "Goat",
   "Monkey",
+  "Mouse",
   "Non_Venomous_Snake",
+  "Pig",
+  "Sheep",
   "Venomous_Snake",
   "Wild_Boar"
 ]

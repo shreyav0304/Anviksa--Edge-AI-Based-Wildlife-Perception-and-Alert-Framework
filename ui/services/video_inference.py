@@ -245,7 +245,7 @@ class VideoInferenceWorker:
             if not capture.isOpened():
                 self._publish(VideoUpdate("error", message="Camera or video source could not be opened.")); return
             ImageInferenceService(MODEL_PATH).verify_model()
-            gate_service = WildlifeGateService(num_threads=1)
+            # The legacy gate can reject new domestic classes; bypass until revalidated.
             classifier = TFLiteWildlifeClassifier(MODEL_PATH, num_threads=1)
             analyzer = TemporalAnalyzer(classifier.class_names, self.smoothing_window, self.stable_frames)
             gate_temporal = GateTemporalState()
@@ -273,18 +273,10 @@ class VideoInferenceWorker:
                 gate = current_gate
                 gate_timed_out = current_gate_timed_out
                 if frames_captured % self.frame_skip == 0:
-                    gate = gate_service.predict(frame_rgb)
-                    gate_timed_out, ended_sighting = gate_temporal.observe(gate.decision, analyzer)
-                    if ended_sighting:
-                        episode_key = uuid.uuid4().hex
-                        emitted_classes.clear()
-                    if gate.decision == "WILDLIFE":
-                        raw = classifier.predict(frame_rgb)
-                        raw_probabilities = np.asarray(raw["probabilities"], dtype=np.float64)
-                        analysis = analyzer.update(raw_probabilities, float(raw["inference_time_ms"]))
-                        inference_ms = gate.inference_time_ms + analysis.inference_time_ms
-                    else:
-                        inference_ms = gate.inference_time_ms
+                    raw = classifier.predict(frame_rgb)
+                    raw_probabilities = np.asarray(raw["probabilities"], dtype=np.float64)
+                    analysis = analyzer.update(raw_probabilities, float(raw["inference_time_ms"]))
+                    inference_ms = analysis.inference_time_ms
                     if self.stop_event.is_set():
                         break
                     current_gate = gate

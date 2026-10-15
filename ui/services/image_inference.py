@@ -10,9 +10,17 @@ from pi_deployment.inference.tflite_inference import TFLiteWildlifeClassifier
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-MODEL_PATH = PROJECT_ROOT / "pi_deployment" / "models" / "mobilenet_v3_large_float32.tflite"
-EXPECTED_MODEL_SHA256 = "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7"
+MODEL_PATH = PROJECT_ROOT / "pi_deployment" / "models" / "anviksa_15class_float32.tflite"
+EXPECTED_MODEL_SHA256 = "36494a90660ac550e1e6db753861a8024d14eefd2c23e229d955f70673b6585a"
 CATEGORIES = {
+    "Big_Cat": "Wild Mammal",
+    "Cat": "Domestic Animal",
+    "Chicken": "Domestic Bird",
+    "Dog": "Domestic Animal",
+    "Goat": "Domestic Animal",
+    "Mouse": "Small Mammal",
+    "Pig": "Domestic Animal",
+    "Sheep": "Domestic Animal",
     "Cow": "Domestic Animal",
     "Deer": "Wild Mammal",
     "Elephant": "Wild Mammal",
@@ -107,7 +115,7 @@ class ImageInferenceService:
             top2_probability=top2_probability,
             margin=margin,
             confidence_level=confidence_level(confidence),
-            status="UNCERTAIN" if uncertain else "CONFIDENT",
+            status="UNCERTAIN" if uncertain else "HIGH MODEL SCORE",
             category=CATEGORIES[top1_class],
             analysis=analysis_message(top1_class, uncertain),
             inference_time_ms=float(raw["inference_time_ms"]),

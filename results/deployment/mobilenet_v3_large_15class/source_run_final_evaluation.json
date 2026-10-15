@@ -1,0 +1,76 @@
+{
+  "test_images": 670,
+  "keras_accuracy": 0.926865671641791,
+  "test_loss": 0.22527210414409637,
+  "loss_definition": "Unweighted mean sparse categorical cross-entropy; selected checkpoint; inference mode",
+  "macro": {
+    "precision": 0.915170958132576,
+    "recall": 0.9256928226577172,
+    "f1-score": 0.9181766055409761,
+    "support": 670.0
+  },
+  "weighted": {
+    "precision": 0.9277427898629396,
+    "recall": 0.926865671641791,
+    "f1-score": 0.9266462175823356,
+    "support": 670.0
+  },
+  "snake_metrics": {
+    "venomous_recall": 0.9078014184397163,
+    "non_venomous_recall": 0.875,
+    "venomous_support": 141,
+    "non_venomous_support": 128,
+    "venomous_correct": 128,
+    "non_venomous_correct": 112,
+    "venomous_predicted_non_venomous": 10,
+    "non_venomous_predicted_venomous": 16,
+    "venomous_predicted_other": 3,
+    "non_venomous_predicted_other": 0
+  },
+  "tflite": {
+    "float32": {
+      "sample_images": 45,
+      "sampling": "3 manifest-spaced images per true class; all 15 classes represented; selected without using predictions",
+      "top1_matches": 45,
+      "top1_agreement": 1.0,
+      "max_absolute_probability_difference": 0.004322469234466553,
+      "mean_max_absolute_probability_difference": 0.00023337344769724193
+    },
+    "float16": {
+      "sample_images": 45,
+      "sampling": "3 manifest-spaced images per true class; all 15 classes represented; selected without using predictions",
+      "top1_matches": 45,
+      "top1_agreement": 1.0,
+      "max_absolute_probability_difference": 0.020865410566329956,
+      "mean_max_absolute_probability_difference": 0.0008225937625386197
+    }
+  },
+  "provenance": {
+    "started_at_ist": "2026-10-11T15:23:20.715434+05:30",
+    "test_images": 670,
+    "checkpoint_sha256": "b869b595a9d4cc6d08cb9ea56560a51e28c7906573f287a7b1b5350e7920a4bc",
+    "class_order": [
+      "Big_Cat",
+      "Cat",
+      "Chicken",
+      "Cow",
+      "Deer",
+      "Dog",
+      "Elephant",
+      "Goat",
+      "Monkey",
+      "Mouse",
+      "Non_Venomous_Snake",
+      "Pig",
+      "Sheep",
+      "Venomous_Snake",
+      "Wild_Boar"
+    ],
+    "preprocessing": "OpenCV decode BGR -> RGB; bilinear 224x224; float32 0..255; MobileNetV3 built-in rescaling",
+    "augmentation": false,
+    "source": "frozen training_source.py decode and make_dataset",
+    "test_hashes_verified": 670
+  },
+  "deployed": false,
+  "completed_at_ist": "2026-10-11T15:23:49.636817+05:30"
+}

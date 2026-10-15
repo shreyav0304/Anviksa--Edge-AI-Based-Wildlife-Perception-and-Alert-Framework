@@ -40,11 +40,11 @@ Run this immediately after copying the package:
 python verify_package.py
 ```
 
-Both model hashes, sizes, required scripts, manifest, and exact seven-class order must pass before benchmarking.
+Both model hashes, sizes, required scripts, manifest, and exact 15-class order must pass before benchmarking.
 
 ## 6. Add a benchmark image
 
-Place a small representative image set in `test_images/`. The benchmark uses the first supported image unless `--image /path/to/image.jpg` is supplied. Speed benchmarking does not require the full frozen 545-image test set.
+Place a small representative image set in `test_images/`. The benchmark uses the first supported image unless `--image /path/to/image.jpg` is supplied. Speed benchmarking does not require the full frozen 670-image test set.
 
 Use the same image for all six configurations. Do not compare runs made with different images or materially different system conditions.
 
@@ -82,7 +82,7 @@ Lower latency is better. FPS is approximately `1000 / average latency in millise
 
 ## 11. Model-only versus end-to-end latency
 
-Model-only latency measures only tensor assignment, interpreter invocation, and output retrieval using an already prepared tensor. End-to-end latency additionally includes reading the image file, RGB conversion, nearest-neighbor resizing, Float32 conversion, batch creation, and inference. Camera capture is not included.
+Model-only latency measures only tensor assignment, interpreter invocation, and output retrieval using an already prepared tensor. End-to-end latency additionally includes reading the image file, RGB conversion, OpenCV bilinear resizing, Float32 conversion, batch creation, and inference. Camera capture is not included.
 
 ## 12. Temperature interpretation
 
@@ -96,3 +96,5 @@ The script reads current RSS (`VmRSS`) and peak RSS (`VmHWM`) from `/proc/self/s
 
 Send back the six original benchmark JSON files plus the generated comparison CSV and JSON. Record the Pi model, cooling method, power supply, OS/Python versions, and whether any thermal-throttling warning occurred. Final selection will consider classification equivalence, model-only and end-to-end latency, FPS, memory, storage, thermal behavior, and stability. No Raspberry Pi performance result exists until these scripts run on the physical device.
 
+
+The active model is the 15-class Float32 export. Full-test Linux CPU accuracy is 620/670 (92.54%); Float16 is 621/670 (92.69%). These are not physical Pi performance results. The older Wildlife Gate is bypassed pending expanded-class validation. See `docs/active_model_validation.md` in the repository.

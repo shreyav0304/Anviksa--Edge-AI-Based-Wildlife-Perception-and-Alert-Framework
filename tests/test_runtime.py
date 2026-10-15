@@ -22,7 +22,7 @@ class PublishedDataTests(unittest.TestCase):
         records = load_comparison_records()
         matrices = load_confusion_records()
         self.assertEqual(len(records), 4)
-        self.assertEqual(len(matrices), 3)
+        self.assertEqual(len(matrices), 4)
         for record in records:
             if record.status == "COMPLETED":
                 matrix = matrices[record.model]
@@ -33,7 +33,56 @@ class PublishedDataTests(unittest.TestCase):
                 self.assertEqual(record.model, "EfficientNetB0")
                 self.assertIsNone(record.accuracy)
                 self.assertNotIn(record.model, matrices)
-        self.assertEqual(load_dashboard_data().selected_model, "MobileNetV3 Large")
+        self.assertEqual(load_dashboard_data().selected_model, "MobileNetV3 Large (15 classes)")
+
+class ActiveEvaluationTests(unittest.TestCase):
+    def test_current_export_has_fifteen_classes_and_recomputed_full_test_results(self):
+        from ui.services.evaluation import load_active_evaluation
+        from ui.services.confusion_data import ACTIVE_MODEL
+        active = load_active_evaluation()
+        matrix = load_confusion_records()[ACTIVE_MODEL]
+        self.assertEqual(active["classes"], backend.load_class_names())
+        self.assertEqual(len(active["classes"]), 15)
+        self.assertEqual(active["total"], 670)
+        self.assertEqual(active["correct"], 620)
+        self.assertEqual(matrix.raw.shape, (15, 15))
+        np.testing.assert_array_equal(matrix.raw, active["raw"])
+        self.assertAlmostEqual(load_dashboard_data().accuracy, 620/670)
+        self.assertEqual(sum(c["support"] for c in active["per_class"]), 670)
+        self.assertLess(active["accuracy_interval"][0], active["accuracy"])
+        self.assertGreater(active["accuracy_interval"][1], active["accuracy"])
+
+    def test_metrics_use_ground_truth_and_keep_orientation(self):
+        from ui.services.evaluation import prediction_metrics
+        probabilities = np.array([[.8,.1,.1],[.2,.7,.1],[.1,.8,.1],[.1,.6,.3]])
+        measured = prediction_metrics(np.array([0,0,1,2]), probabilities, ("A","B","C"))
+        np.testing.assert_array_equal(measured["raw"], [[1,1,0],[0,1,0],[0,1,0]])
+        self.assertEqual(measured["accuracy"], .5)
+        self.assertEqual(measured["per_class"][0]["recall"], .5)
+        self.assertAlmostEqual(measured["per_class"][1]["precision"], 1/3)
+        self.assertAlmostEqual(measured["macro_f1"], (2/3+.5)/3)
+        with self.assertRaises(ValueError):
+            prediction_metrics(np.array([0,0,1,2]), probabilities[:, :2], ("A","B","C"))
+        with self.assertRaises(ValueError):
+            prediction_metrics(np.array([0,0,1,5]), probabilities, ("A","B","C"))
+
+    def test_scores_do_not_round_near_one_into_perfect_certainty(self):
+        from ui.services.evaluation import format_model_score
+        self.assertEqual(format_model_score(.9999572038650513), "99.99572%")
+        self.assertIn("saturated", format_model_score(1))
+        self.assertNotIn("100", format_model_score(.99999999999))
+        for invalid in (float("nan"), float("inf"), -1, 1.01):
+            with self.assertRaises(ValueError): format_model_score(invalid)
+
+    def test_bilinear_preprocessing_matches_frozen_opencv_pipeline(self):
+        import cv2
+        pixels = np.arange(11*13*3, dtype=np.uint8).reshape(11,13,3)
+        expected = cv2.resize(pixels, (224,224), interpolation=cv2.INTER_LINEAR).astype(np.float32)
+        np.testing.assert_array_equal(backend.preprocess_image(pixels)[0], expected)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)/"test.png"
+            path.write_bytes(cv2.imencode(".png", cv2.cvtColor(pixels,cv2.COLOR_RGB2BGR))[1].tobytes())
+            np.testing.assert_array_equal(backend.preprocess_image(path)[0], expected)
 
 class InferenceContractTests(unittest.TestCase):
     def test_pixel_preprocessing_retains_model_contract(self):
@@ -146,7 +195,7 @@ class CaptureTests(unittest.TestCase):
         cv.VideoCapture.return_value = capture
         cv.cvtColor.side_effect = lambda frame, _code: frame
         classifier = Mock(class_names=backend.EXPECTED_CLASSES)
-        classifier.predict.return_value = {"probabilities": [.9, .1, 0, 0, 0, 0, 0], "inference_time_ms": 1}
+        classifier.predict.return_value = {"probabilities": [.9, .1] + [0] * (len(backend.EXPECTED_CLASSES)-2), "inference_time_ms": 1}
         gate = Mock()
         gate.predict.return_value = WildlifeGateResult(.9, .1, "WILDLIFE", 1)
         with patch("ui.services.video_inference.require_opencv", return_value=cv), \
@@ -154,6 +203,7 @@ class CaptureTests(unittest.TestCase):
              patch("ui.services.video_inference.TFLiteWildlifeClassifier", return_value=classifier), \
              patch("ui.services.video_inference.WildlifeGateService", return_value=gate):
             worker._run()
+        gate.predict.assert_not_called()
         self.assertEqual(worker.event_updates.qsize(), 1)
         event = worker.event_updates.get_nowait()
         self.assertEqual(event.frames_captured, 1)

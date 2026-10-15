@@ -24,8 +24,8 @@ from inference.tflite_inference import TFLiteWildlifeClassifier, preprocess_imag
 
 
 MODELS = {
-    "float32": PACKAGE_ROOT / "models/mobilenet_v3_large_float32.tflite",
-    "float16": PACKAGE_ROOT / "models/mobilenet_v3_large_float16.tflite",
+    "float32": PACKAGE_ROOT / "models/anviksa_15class_float32.tflite",
+    "float16": PACKAGE_ROOT / "models/anviksa_15class_float16.tflite",
 }
 VALID_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
@@ -184,7 +184,7 @@ def main() -> None:
             "average_latency_ms": end_average,
             "median_latency_ms": statistics.median(end_to_end_timings),
             "approximate_fps": 1000.0 / end_average if end_average > 0 else 0.0,
-            "includes": "image file load, RGB conversion, nearest-neighbor resize, Float32 conversion, batch dimension, and inference",
+            "includes": "image file load, RGB conversion, OpenCV bilinear resize, Float32 conversion, batch dimension, and inference",
         },
         "memory": {
             "before_model_load": rss_before,

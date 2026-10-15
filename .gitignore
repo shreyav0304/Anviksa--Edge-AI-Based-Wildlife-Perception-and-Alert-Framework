@@ -94,3 +94,6 @@ wildlife_gate/dataset/
 wildlife_gate/results/gate_v1/wildlife_gate_v1.keras
 external_test_images/s11.jpeg
 external_test_images/s12.jpeg
+
+# Local copy of the 15-class source dataset (inventory is bundled with the UI)
+datasets/Anviksa_15Class_Dataset/

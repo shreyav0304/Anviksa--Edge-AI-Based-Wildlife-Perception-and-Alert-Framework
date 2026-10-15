@@ -10,6 +10,7 @@ from PIL import Image, ImageTk
 
 from ..components import MetricCard, SectionCard
 from ..services.detection_history import DetectionEvent, DetectionHistoryService
+from ..services.evaluation import format_model_score
 from .base import ScrollablePage
 
 
@@ -33,7 +34,7 @@ class DetectionHistoryPage(ScrollablePage):
     def _build(self) -> None:
         ttk.Label(self.content, text="LOCAL RUNTIME RECORDS", style="Eyebrow.TLabel").pack(anchor="w")
         ttk.Label(self.content, text="Detection History", style="PageTitle.TLabel").pack(anchor="w", pady=(4, 4))
-        ttk.Label(self.content, text="Runtime detections and snapshots are separate from all training datasets.", style="Muted.TLabel").pack(anchor="w")
+        ttk.Label(self.content, text="Runtime detections are separate from training data. Notes identify new 15-class events; older unversioned records are preserved.", style="Muted.TLabel").pack(anchor="w")
 
         summaries = ttk.Frame(self.content, style="Page.TFrame"); summaries.pack(fill="x", pady=(14, 8))
         labels = ("Total Events", "Image Events", "Video Events", "Webcam Events", "Snake Events", "Venomous Snake", "Non-Venomous Snake", "High-Threat Events")
@@ -41,13 +42,15 @@ class DetectionHistoryPage(ScrollablePage):
         for index, label in enumerate(labels):
             variable = tk.StringVar(value="0"); self.summary_vars[label] = variable
             card = ttk.Frame(summaries, style="Metric.TFrame", padding=(12, 9)); card.grid(row=index//4, column=index%4, sticky="nsew", padx=4, pady=4)
-            ttk.Label(card, text=label.upper(), style="MetricLabel.TLabel").pack(anchor="w")
+            ttk.Label(card, text=("MODEL SCORE (UNCALIBRATED)" if label == "Confidence" else label.upper()), style="MetricLabel.TLabel").pack(anchor="w")
             ttk.Label(card, textvariable=variable, style="MetricValue.TLabel").pack(anchor="w")
 
+        from pi_deployment.inference.tflite_inference import load_class_names
         filters = ttk.Frame(self.content, style="Card.TFrame", padding=14); filters.pack(fill="x", pady=(4, 10))
-        for label, variable, values in (("Source", self.source_filter, ("All", "IMAGE", "VIDEO", "WEBCAM")), ("Class", self.class_filter, ("All", "Cow", "Deer", "Elephant", "Monkey", "Non_Venomous_Snake", "Venomous_Snake", "Wild_Boar")), ("Confidence", self.confidence_filter, ("All", "HIGH", "MODERATE", "LOW"))):
-            ttk.Label(filters, text=label.upper(), style="MetricLabel.TLabel").pack(side="left", padx=(8, 4))
+        for label, variable, values in (("Source", self.source_filter, ("All", "IMAGE", "VIDEO", "WEBCAM")), ("Class", self.class_filter, ("All", *load_class_names())), ("Confidence", self.confidence_filter, ("All", "HIGH", "MODERATE", "LOW"))):
+            ttk.Label(filters, text=("MODEL SCORE (UNCALIBRATED)" if label == "Confidence" else label.upper()), style="MetricLabel.TLabel").pack(side="left", padx=(8, 4))
             box = ttk.Combobox(filters, textvariable=variable, values=values, state="readonly", width=18); box.pack(side="left"); box.bind("<<ComboboxSelected>>", lambda _e: self.apply_filters())
+            if label == "Class": self.class_box = box
         ttk.Label(filters, text="SEARCH", style="MetricLabel.TLabel").pack(side="left", padx=(12, 4))
         search = ttk.Entry(filters, textvariable=self.search_text, width=20); search.pack(side="left"); search.bind("<Return>", lambda _e: self.apply_filters())
         ttk.Button(filters, text="Search", command=self.apply_filters).pack(side="left", padx=5)
@@ -59,8 +62,8 @@ class DetectionHistoryPage(ScrollablePage):
         table_row = ttk.Frame(table_card, style="Card.TFrame")
         table_row.pack(fill="x")
         self.table = ttk.Treeview(table_row, columns=columns, show="headings", height=9)
-        headings = ("Timestamp", "Source", "Prediction", "Confidence", "Status", "Threat", "Snapshot")
-        widths = (190, 90, 170, 100, 100, 90, 100)
+        headings = ("Timestamp", "Source", "Prediction", "Model score", "Status", "Threat", "Snapshot")
+        widths = (190, 90, 170, 190, 100, 90, 100)
         for column, heading, width in zip(columns, headings, widths, strict=True):
             self.table.heading(column, text=heading); self.table.column(column, width=width, anchor="center")
         self.table.pack(side="left", fill="both", expand=True)
@@ -80,7 +83,7 @@ class DetectionHistoryPage(ScrollablePage):
             variable = tk.StringVar(value="—"); self.detail_vars[label] = variable
             cell = ttk.Frame(grid, style="Card.TFrame"); cell.grid(row=index//3, column=index%3, sticky="nsew", padx=8, pady=5)
             grid.columnconfigure(index%3, weight=1, uniform="detail")
-            ttk.Label(cell, text=label.upper(), style="MetricLabel.TLabel").pack(anchor="w")
+            ttk.Label(cell, text=("MODEL SCORE (UNCALIBRATED)" if label == "Confidence" else label.upper()), style="MetricLabel.TLabel").pack(anchor="w")
             ttk.Label(cell, textvariable=variable, style="BodyStrong.TLabel", wraplength=320).pack(anchor="w")
         actions = ttk.Frame(details, style="Card.TFrame"); actions.pack(fill="x", pady=(10, 0))
         self.view_button = ttk.Button(actions, text="View Snapshot", command=self.view_snapshot, state="disabled"); self.view_button.pack(side="left")
@@ -88,7 +91,7 @@ class DetectionHistoryPage(ScrollablePage):
         ttk.Button(actions, text="Export Filtered CSV", command=self.export_filtered).pack(side="left")
 
         limitation = SectionCard(self.content, "Important limitation"); limitation.pack(fill="x", pady=(12, 0))
-        ttk.Label(limitation, text="The current seven-class model has no Background/No Animal/Unknown class. Empty or unsupported scenes can produce false wildlife events. History counts are runtime detections—not accuracy, precision, recall, or F1.", style="Warning.TLabel", wraplength=1050).pack(fill="x")
+        ttk.Label(limitation, text="The current 15-class model has no Background/No Animal/Unknown class. Empty or unsupported scenes can produce false wildlife events. History counts are runtime detections—not accuracy, precision, recall, or F1.", style="Warning.TLabel", wraplength=1050).pack(fill="x")
         ttk.Label(limitation, text="Threat level is application metadata, not a neural-network output. No history deletion controls are provided in this phase.", style="Notice.TLabel").pack(anchor="w", pady=(8, 0))
 
     def refresh_history(self) -> None:
@@ -97,6 +100,8 @@ class DetectionHistoryPage(ScrollablePage):
         except (OSError, UnicodeError, ValueError) as exc:
             self.empty_var.set(f"Unable to read history: {exc}. Existing records were preserved.")
             return
+        from pi_deployment.inference.tflite_inference import load_class_names
+        self.class_box.configure(values=("All", *sorted(set(load_class_names()) | {e.predicted_class for e in self.events})))
         self._update_summaries()
         self.apply_filters()
 
@@ -119,7 +124,7 @@ class DetectionHistoryPage(ScrollablePage):
         self.table.delete(*self.table.get_children())
         for index, event in enumerate(reversed(self.filtered_events)):
             original_index = len(self.filtered_events) - 1 - index
-            self.table.insert("", "end", iid=str(original_index), values=(event.timestamp, event.source_type, event.display_class, f"{event.confidence*100:.2f}%", event.confidence_status, event.threat_level, "Available" if self.service.resolve_snapshot(event.snapshot_path) else "Unavailable"))
+            self.table.insert("", "end", iid=str(original_index), values=(event.timestamp, event.source_type, event.display_class, format_model_score(event.confidence), event.confidence_status, event.threat_level, "Available" if self.service.resolve_snapshot(event.snapshot_path) else "Unavailable"))
         message = "No detection history recorded yet." if not self.events else "No events match the current filters." if not self.filtered_events else f"Showing {len(self.filtered_events)} event(s)."
         if self.service.malformed_rows: message += f" Skipped {self.service.malformed_rows} malformed row(s); the master file was not changed."
         self.empty_var.set(message); self._clear_details()
@@ -131,7 +136,7 @@ class DetectionHistoryPage(ScrollablePage):
         selection = self.table.selection()
         if not selection: return
         event = self.filtered_events[int(selection[0])]
-        values = {"Event ID": event.event_id, "Timestamp": event.timestamp, "Source": f"{event.source_type}: {event.source_name}", "Prediction": event.display_class, "Confidence": f"{event.confidence*100:.2f}% ({event.confidence_status})", "Top-2": f"{event.top2_class} — {event.top2_probability*100:.2f}%", "Margin": f"{event.margin*100:.2f} percentage points", "Threat": event.threat_level, "Stable": f"{event.stable} (count {event.stable_count})", "Inference": f"{event.inference_time_ms:.2f} ms", "Snapshot": event.snapshot_path or "Unavailable", "Notes": event.notes}
+        values = {"Event ID": event.event_id, "Timestamp": event.timestamp, "Source": f"{event.source_type}: {event.source_name}", "Prediction": event.display_class, "Confidence": f"{format_model_score(event.confidence)} ({event.confidence_status} score)", "Top-2": f"{event.top2_class} — {event.top2_probability*100:.2f}%", "Margin": f"{event.margin*100:.2f} percentage points", "Threat": event.threat_level, "Stable": f"{event.stable} (count {event.stable_count})", "Inference": f"{event.inference_time_ms:.2f} ms", "Snapshot": event.snapshot_path or "Unavailable", "Notes": event.notes}
         for key, value in values.items(): self.detail_vars[key].set(value)
         self.view_button.configure(state="normal" if self.service.resolve_snapshot(event.snapshot_path) else "disabled")
 

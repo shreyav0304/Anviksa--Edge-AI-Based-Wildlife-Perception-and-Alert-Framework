@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import sys
+from functools import partial
 from pathlib import Path
 from time import perf_counter
 from typing import Any, Tuple
@@ -13,12 +15,9 @@ from PIL import Image
 
 PACKAGE_ROOT = Path(__file__).resolve().parent.parent
 CLASS_NAMES_PATH = Path(__file__).resolve().with_name("class_names.json")
-EXPECTED_CLASSES = (
-    "Cow", "Deer", "Elephant", "Monkey", "Non_Venomous_Snake",
-    "Venomous_Snake", "Wild_Boar",
-)
+EXPECTED_CLASSES = ('Big_Cat', 'Cat', 'Chicken', 'Cow', 'Deer', 'Dog', 'Elephant', 'Goat', 'Monkey', 'Mouse', 'Non_Venomous_Snake', 'Pig', 'Sheep', 'Venomous_Snake', 'Wild_Boar')
 EXPECTED_INPUT_SHAPE = (1, 224, 224, 3)
-EXPECTED_OUTPUT_SHAPE = (1, 7)
+EXPECTED_OUTPUT_SHAPE = (1, len(EXPECTED_CLASSES))
 
 
 def _load_interpreter_class() -> Tuple[Any, str]:
@@ -31,6 +30,11 @@ def _load_interpreter_class() -> Tuple[Any, str]:
         try:
             from ai_edge_litert.interpreter import Interpreter
 
+            if sys.platform == "win32":
+                # LiteRT 2.3.0's default Windows XNNPACK delegate exits natively on this model.
+                # Built-in kernels are verified separately; keep Linux/Pi runtime defaults.
+                from ai_edge_litert.interpreter import OpResolverType
+                return partial(Interpreter, experimental_op_resolver_type=OpResolverType.BUILTIN_WITHOUT_DEFAULT_DELEGATES), "ai_edge_litert.interpreter.Interpreter (Windows built-in kernels)"
             return Interpreter, "ai_edge_litert.interpreter.Interpreter"
         except ImportError:
             try:
@@ -47,36 +51,37 @@ def _load_interpreter_class() -> Tuple[Any, str]:
 def load_class_names(path: Path = CLASS_NAMES_PATH) -> Tuple[str, ...]:
     names = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(names, list) or tuple(names) != EXPECTED_CLASSES:
-        raise ValueError("class_names.json must match the exact validated seven-class order.")
+        raise ValueError("class_names.json must match the exact deployed class order.")
     return tuple(names)
 
 
 def preprocess_image(image: Any) -> np.ndarray:
-    """Return RGB nearest-neighbor 224x224 Float32 pixels in [0, 255].
+    """Return RGB OpenCV bilinear 224x224 Float32 pixels in [0, 255].
 
     Paths are opened on every call. PIL images and RGB NumPy arrays are also
     accepted, which is useful when a future camera adapter supplies a frame.
     """
+    try:
+        import cv2
+    except ImportError as exc:
+        raise RuntimeError("OpenCV is required to match the 15-class training preprocessing") from exc
     if isinstance(image, (str, Path)):
-        with Image.open(image) as opened:
-            rgb = opened.convert("RGB")
-            resized = rgb.resize((224, 224), resample=Image.Resampling.NEAREST)
-            array = np.asarray(resized, dtype=np.float32)
+        # Match the frozen training decoder, including EXIF handling and OpenCV resize.
+        decoded = cv2.imdecode(np.frombuffer(Path(image).read_bytes(), dtype=np.uint8), cv2.IMREAD_COLOR)
+        if decoded is None:
+            raise ValueError(f"Cannot decode image: {image}")
+        array = cv2.cvtColor(decoded, cv2.COLOR_BGR2RGB)
     elif isinstance(image, Image.Image):
-        rgb = image.convert("RGB")
-        resized = rgb.resize((224, 224), resample=Image.Resampling.NEAREST)
-        array = np.asarray(resized, dtype=np.float32)
+        array = np.asarray(image.convert("RGB"))
     else:
         array = np.asarray(image)
-        if array.ndim != 3 or array.shape[2] != 3 or not array.shape[0] or not array.shape[1]:
-            raise ValueError("NumPy image input must be a nonempty RGB HxWx3 array.")
-        if not np.issubdtype(array.dtype, np.number) or not np.isfinite(array).all():
-            raise ValueError("RGB pixels must contain finite real numbers.")
-        if np.iscomplexobj(array) or np.any(array < 0) or np.any(array > 255):
-            raise ValueError("RGB pixels must remain in [0, 255].")
-        rgb = Image.fromarray(np.asarray(array, dtype=np.uint8), mode="RGB")
-        resized = rgb.resize((224, 224), resample=Image.Resampling.NEAREST)
-        array = np.asarray(resized, dtype=np.float32)
+    if array.ndim != 3 or array.shape[2] != 3 or not array.shape[0] or not array.shape[1]:
+        raise ValueError("Image input must be a nonempty RGB HxWx3 array.")
+    if not np.issubdtype(array.dtype, np.number) or np.iscomplexobj(array) or not np.isfinite(array).all():
+        raise ValueError("RGB pixels must contain finite real numbers.")
+    if np.any(array < 0) or np.any(array > 255):
+        raise ValueError("RGB pixels must remain in [0, 255].")
+    array = cv2.resize(np.asarray(array, dtype=np.uint8), (224, 224), interpolation=cv2.INTER_LINEAR).astype(np.float32)
 
     batch = np.expand_dims(array, axis=0)
     if batch.shape != EXPECTED_INPUT_SHAPE or batch.dtype != np.float32:
@@ -128,7 +133,7 @@ class TFLiteWildlifeClassifier:
         self.interpreter.invoke()
         probabilities = self.interpreter.get_tensor(self.output_detail["index"])[0].copy()
         elapsed_ms = (perf_counter() - started) * 1000.0
-        if probabilities.shape != (7,) or not np.isfinite(probabilities).all():
+        if probabilities.shape != (len(EXPECTED_CLASSES),) or not np.isfinite(probabilities).all():
             raise ValueError("Interpreter returned invalid probabilities.")
         if np.any(probabilities < 0) or np.any(probabilities > 1):
             raise ValueError("Interpreter probabilities must lie in [0, 1].")

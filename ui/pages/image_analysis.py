@@ -13,6 +13,7 @@ from ..components import SectionCard
 from ..services import ImageAnalysisResult, ImageInferenceService
 from ..services.detection_history import DetectionHistoryService
 from ..services.image_inference import friendly_name
+from ..services.evaluation import format_model_score
 from .base import ScrollablePage
 
 
@@ -62,7 +63,7 @@ class ImageAnalysisPage(ScrollablePage):
         self.result_vars = {name: tk.StringVar(value="—") for name in ("Prediction", "Confidence", "Category", "Status", "Top-2 Prediction", "Top-2 Probability", "Prediction Margin", "Inference Time")}
         for label, variable in self.result_vars.items():
             line = ttk.Frame(result_card, style="Card.TFrame"); line.pack(fill="x", pady=4)
-            ttk.Label(line, text=label.upper(), style="MetricLabel.TLabel").pack(anchor="w")
+            ttk.Label(line, text=("MODEL SCORE (UNCALIBRATED)" if label == "Confidence" else label.upper()), style="MetricLabel.TLabel").pack(anchor="w")
             ttk.Label(line, textvariable=variable, style="ResultValue.TLabel", wraplength=400).pack(anchor="w", pady=(1, 0))
         self.analysis_var = tk.StringVar(value="Awaiting analysis")
         ttk.Separator(result_card).pack(fill="x", pady=10)
@@ -77,13 +78,13 @@ class ImageAnalysisPage(ScrollablePage):
             ttk.Label(row, text=friendly_name(class_name), style="Body.TLabel", width=23).pack(side="left")
             bar = ttk.Progressbar(row, maximum=100, value=0); bar.pack(side="left", fill="x", expand=True, padx=8)
             value = tk.StringVar(value="0.00%")
-            ttk.Label(row, textvariable=value, style="BodyStrong.TLabel", width=9, anchor="e").pack(side="right")
+            ttk.Label(row, textvariable=value, style="BodyStrong.TLabel", width=24, anchor="e").pack(side="right")
             self.probability_widgets[class_name] = (bar, value)
 
         footer = ttk.Frame(self.content, style="Card.TFrame", padding=14); footer.pack(fill="x", pady=(12, 0))
         ttk.Label(footer, text="MODEL", style="MetricLabel.TLabel").pack(side="left")
         ttk.Label(footer, text="MobileNetV3 Large — Float32 TFLite", style="BodyStrong.TLabel").pack(side="left", padx=10)
-        ttk.Label(footer, text="The current classifier always selects one of seven trained classes. Predictions on images without a supported animal should be treated as exploratory.", style="Notice.TLabel", wraplength=650).pack(side="right")
+        ttk.Label(footer, text="The current classifier always selects one of 15 trained output classes. Predictions on images without a supported animal should be treated as exploratory.", style="Notice.TLabel", wraplength=650).pack(side="right")
 
     @staticmethod
     def _class_names() -> tuple[str, ...]:
@@ -149,11 +150,11 @@ class ImageAnalysisPage(ScrollablePage):
         self._last_result = result
         values = {
             "Prediction": friendly_name(result.predicted_class),
-            "Confidence": f"{result.confidence * 100:.2f}% ({result.confidence_level})",
+            "Confidence": f"{format_model_score(result.confidence)} ({result.confidence_level} score)",
             "Category": result.category,
             "Status": result.status,
             "Top-2 Prediction": friendly_name(result.top2_class),
-            "Top-2 Probability": f"{result.top2_probability * 100:.2f}%",
+            "Top-2 Probability": format_model_score(result.top2_probability),
             "Prediction Margin": f"{result.margin * 100:.2f} percentage points",
             "Inference Time": f"{result.inference_time_ms:.2f} ms",
         }
@@ -161,7 +162,7 @@ class ImageAnalysisPage(ScrollablePage):
         self.analysis_var.set(result.analysis)
         for class_name, probability in result.probabilities:
             bar, text = self.probability_widgets[class_name]
-            bar.configure(value=probability * 100); text.set(f"{probability * 100:.2f}%")
+            bar.configure(value=probability * 100); text.set(format_model_score(probability))
         if result.is_snake: self.snake_warning.pack(fill="x", pady=(12, 0))
         else: self.snake_warning.pack_forget()
         self.save_button.configure(state="normal")
@@ -201,6 +202,7 @@ class ImageAnalysisPage(ScrollablePage):
                 confidence_status=result.confidence_level,
                 uncertain=result.status == "UNCERTAIN",
                 inference_time_ms=result.inference_time_ms,
+                notes="Explicit image analysis; 15-class Float32; run mobilenetv3large_15class_gpu_20261011_123242; raw uncalibrated model score",
             )
         except (OSError, ValueError, RuntimeError) as exc:
             messagebox.showerror("Save detection failed", str(exc), parent=self)

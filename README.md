@@ -1,25 +1,33 @@
 # Anvīkṣa - Edge AI-Based Wildlife Perception and Alert Framework
 
-Anvīkṣa AI is an offline wildlife classification project for agricultural land, forest borders, and residential areas. It combines a validated MobileNetV3 Large classifier with a Tkinter dashboard, image/video analysis, Wildlife Gate pre-screening, and local detection history.
+Anvīkṣa AI is an offline wildlife classification project for agricultural land, forest borders, and residential areas. It combines a validated MobileNetV3 Large classifier with a Tkinter dashboard, image/video analysis, and local detection history.
 
 **Software status:** dashboard and inference implemented; model validation and development-machine tests pass. **Physical Raspberry Pi validation and field hardware integration remain pending.**
 
+## Active 15-class model
+
+The app now uses the supplied October 2026 15-class MobileNetV3 Large Float32 export. Full-test CPU inference on all 670 hash-verified test images measured **620/670 correct (92.54% accuracy)** and **91.77% Macro F1**. Float16 measured 621/670 (92.69%). The earlier seven-class results below are historical baselines on a different test set. See [the active-model validation report](docs/active_model_validation.md).
+
+The local dataset copy is in `datasets/Anviksa_15Class_Dataset` (4,692 train / 667 validation / 670 test images; all 6,029 copies verified). Images are excluded from Git; the UI includes a portable class/split inventory and an Open dataset folder button when images are installed.
+
 ## Dashboard
 
-Launch the desktop application with `python run_ui.py`. Its sidebar provides:
+On this Windows machine, double-click `run_ui_windows.bat`, or run `.venv\Scripts\python.exe -s -B run_ui.py`. A fresh Windows environment can be created with `py -m venv .venv` and `.venv\Scripts\python.exe -m pip install -r requirements_windows.txt`.
+
+On Raspberry Pi, activate the documented `.venv` and run `python run_ui.py`. Use `python -B scripts/check_pi_dependencies.py` to diagnose environment issues. The interface provides:
 
 | Section | Features |
 | --- | --- |
 | Overview | Selected model, validated metrics, classes, and project status |
 | Image Analysis | Local image classification, class probabilities, confidence, and explicitly saved detections |
-| Video / Webcam | Recorded videos or USB webcam frames, Wildlife Gate pre-screening, probability smoothing, and stable sightings |
+| Video / Webcam | Recorded videos or USB webcam frames, probability smoothing, and stable sightings |
 | Model Comparison | Accuracy, precision, recall, F1, probability MSE, confidence, and snake-class performance |
-| Confusion Matrix | Separate columns for all models, raw counts or normalized percentages, and selected-model details |
+| Confusion Matrix | Active matrix or three separate stacked historical matrices, counts or row percentages, class keys, and exact cell details |
 | Detection History | Local events, filters, snapshots, summaries, and CSV export |
 | System Deployment | Device information, model-file availability, integration status, and launch instructions |
 | About Project | Purpose, perception pipeline, classes, research results, and documentation |
 
-Navigation and page scrollbars keep these sections accessible on small displays. Desktop regression checks cover **800x480** and **480x320**. Pages load independently; a failed section shows its error and a Retry button while other sections remain available.
+The Section picker at the top always lists all eight sections. Below 900 pixels wide, the sidebar hides to leave more room for content; it returns when the window is widened. Alt+1 through Alt+8 also switch sections. Wide tables and plots remain accessible with the bottom scrollbar or Shift + mouse wheel; a hint appears when horizontal scrolling is needed. Navigation automatically scrolls to the selected sidebar button. Desktop regression checks cover **1180x720**, **800x480**, and **480x320**, including section selection and horizontal scrolling. Pages load independently; a failed section shows its error and a Retry button while other sections remain available.
 
 Comparison pages read committed summaries and frozen prediction caches. Private historical training runs and dashboard regeneration are not required. EfficientNetB0 shows **N/A** because its controlled experiment was incomplete.
 
@@ -74,7 +82,7 @@ Local image / recorded video / USB webcam
                     |
           RGB frame preprocessing
                     |
-     Wildlife Gate (video/webcam only)
+     RGB preprocessing (OpenCV bilinear)
                     |
      MobileNetV3 Large classification
                     |
@@ -83,9 +91,9 @@ Local image / recorded video / USB webcam
      Dashboard + local history/snapshots
 ```
 
-Wildlife Gate rejects non-wildlife frames and pauses species classification when uncertain. Confident, stable video/webcam sightings are saved automatically; image detections are saved explicitly. Eligible events use a separate queue so dropped preview frames do not discard detection history.
+The legacy Wildlife Gate is bypassed because its coverage is unvalidated for the added classes. Confident, stable video/webcam sightings are saved automatically; image detections are saved explicitly. Eligible events use a separate queue so dropped preview frames do not discard detection history.
 
-The seven-class model classifies a **whole frame**; it does not produce bounding boxes or identify individual animals. It has no Background/Unknown class. Gate decisions, confidence thresholds, and threat labels are application logic, not guarantees of species identification. Snake predictions require careful human verification.
+The active 15-class model classifies a **whole frame**; it does not produce bounding boxes or identify individual animals. It has no Background/Unknown class. Gate decisions, confidence thresholds, and threat labels are application logic, not guarantees of species identification. Snake predictions require careful human verification.
 
 The proposed field hardware adds an mmWave presence trigger, Raspberry Pi camera, GPIO LED/buzzer alerts, rechargeable battery, charge controller, and solar panel. These integrations remain planned. The mmWave sensor would trigger capture; camera images provide the classification input.
 
@@ -93,25 +101,33 @@ The proposed field hardware adds an mmWave presence trigger, Raspberry Pi camera
 
 The original frozen wildlife training dataset and local integrity manifests are excluded from Git. The repository also contains supplemental snake-image/video material and related audit tools; these are separate from the original controlled experiment.
 
-The validated classifier's output order is fixed:
+The active classifier's output order is fixed:
 
-1. Cow
-2. Deer
-3. Elephant
-4. Monkey
-5. Non_Venomous_Snake
-6. Venomous_Snake
-7. Wild_Boar
+1. Big_Cat
+2. Cat
+3. Chicken
+4. Cow
+5. Deer
+6. Dog
+7. Elephant
+8. Goat
+9. Monkey
+10. Mouse
+11. Non_Venomous_Snake
+12. Pig
+13. Sheep
+14. Venomous_Snake
+15. Wild_Boar
 
 Completed baseline models were evaluated on the same **545-image frozen test split**. Training and dataset utilities require their corresponding local inputs and are not part of dashboard startup.
 
-## Model comparison
+## Historical seven-class model comparison
 
 | Model | Test accuracy | Macro F1 | Status |
 | --- | ---: | ---: | --- |
 | Custom CNN | 50.46% | 50.73% | Completed baseline |
 | MobileNetV2 | 92.48% | 95.20% | Completed transfer-learning baseline |
-| **MobileNetV3 Large** | **95.41%** | **96.87%** | **Selected deployment architecture** |
+| **MobileNetV3 Large** | **95.41%** | **96.87%** | Historical seven-class winner |
 | EfficientNetB0 | N/A | N/A | Incomplete; excluded from ranking |
 
 MobileNetV3 Large achieved **92.91% venomous-snake recall** and **92.16% snake macro recall**. Its frozen-test confusion matrix contains **520 correct predictions out of 545**.
@@ -120,18 +136,16 @@ See [comparison results](results/comparison/) and [dashboard artifacts](results/
 
 ## TensorFlow Lite deployment
 
-| Representation | Model size | Test accuracy | Frozen-test prediction agreement |
-| --- | ---: | ---: | --- |
-| Float32 TFLite | 12.32 MiB | 95.41% | 545/545 with Keras |
-| Float16 TFLite | 6.25 MiB | 95.41% | 545/545 with Keras and Float32 |
+| Representation | Model size | Full-test accuracy | Correct / tested |
+| --- | ---: | ---: | ---: |
+| Float32 TFLite (active) | 11.42 MiB | 92.54% | 620/670 |
+| Float16 TFLite | 5.79 MiB | 92.69% | 621/670 |
 
-Float16 reduces storage by approximately **49.31%**. The current dashboard uses Float32; choosing the preferred representation on the Pi awaits physical benchmarking.
+The current files are `pi_deployment/models/anviksa_15class_float32.tflite` and `anviksa_15class_float16.tflite`. RGB images use **OpenCV bilinear 224 x 224 resizing**, Float32 pixels in **[0,255]**, and the model's embedded rescaling. Do not divide pixels by 255 or apply MobileNetV2 preprocessing.
 
-The species classifier expects RGB images resized to **224 x 224** with nearest-neighbor interpolation, Float32 dtype, and pixels in **[0, 255]**. Normalization is embedded in the model: do not divide pixels by 255 or apply MobileNetV2 preprocessing. Wildlife Gate has its own preprocessing implementation.
+The UI computes metrics and matrices from stored labeled predictions and verifies the selected model and prediction-cache hashes. Raw model scores are uncalibrated, preserve extra precision near one, and label exact floating-point ones as saturated scores. Accuracy and confidence are separate measurements. Original seven-class files remain for historical reference.
 
-Deployed files are in [pi_deployment/models/](pi_deployment/models/); conversion metrics and matrices are in [results/deployment/](results/deployment/). Model integrity, exact class order, input tensors, and output probabilities are checked by the runtime and diagnostics.
-
-Development-machine timing measurements are **not Raspberry Pi performance measurements**. For separate model-only and end-to-end benchmarks using 1, 2, and 4 threads, follow [the benchmark guide](pi_deployment/README_PI.md). Compare all six configurations using the same image, device, and measurement protocol.
+Development-machine measurements do not establish Raspberry Pi performance. Follow [the benchmark guide](pi_deployment/README_PI.md) to test the new exports on-device.
 
 ## Detection history
 

@@ -18,6 +18,9 @@ class ScrollablePage(ttk.Frame):
         self.canvas.grid(row=0, column=0, sticky="nsew")
         vertical.grid(row=0, column=1, sticky="ns")
         horizontal.grid(row=1, column=0, sticky="ew")
+        self.scroll_hint = ttk.Label(self, text="More content to the right - drag the bottom scrollbar or use Shift + wheel.",
+                                     style="PageBody.TLabel", padding=(8, 2), wraplength=400)
+        self.scroll_hint.grid(row=2, column=0, sticky="ew")
         self.content.bind("<Configure>", self._resize_content)
         self.canvas.bind("<Configure>", self._resize_content)
         root = self.winfo_toplevel()
@@ -39,6 +42,11 @@ class ScrollablePage(ttk.Frame):
     def _resize_content(self, _event=None) -> None:
         self.canvas.itemconfigure(self._window, width=max(self.canvas.winfo_width(), self.MIN_CONTENT_WIDTH))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.scroll_hint.configure(wraplength=max(160, self.canvas.winfo_width() - 16))
+        if self.canvas.winfo_width() < self.MIN_CONTENT_WIDTH:
+            self.scroll_hint.grid()
+        else:
+            self.scroll_hint.grid_remove()
 
     def _on_mousewheel(self, event: tk.Event) -> None:
         if not self.winfo_ismapped():
@@ -48,5 +56,8 @@ class ScrollablePage(ttk.Frame):
             widget = getattr(widget, "master", None)
         if widget is not self:
             return
-        delta = -1 if getattr(event, "num", None) == 4 else 1 if getattr(event, "num", None) == 5 else int(-event.delta / 120)
-        self.canvas.yview_scroll(delta, "units")
+        delta = -1 if getattr(event, "num", None) == 4 else 1 if getattr(event, "num", None) == 5 else (-1 if event.delta > 0 else 1 if event.delta < 0 else 0)
+        if event.state & 0x0001:
+            self.canvas.xview_scroll(delta, "units")
+        else:
+            self.canvas.yview_scroll(delta, "units")

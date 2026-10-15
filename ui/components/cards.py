@@ -16,10 +16,18 @@ class SectionCard(ttk.Frame):
 class MetricCard(ttk.Frame):
     def __init__(self, parent: tk.Misc, label: str, value: str, detail: str = "") -> None:
         super().__init__(parent, style="Metric.TFrame", padding=(16, 14))
-        ttk.Label(self, text=label.upper(), style="MetricLabel.TLabel").pack(anchor="w")
-        ttk.Label(self, text=value, style="MetricValue.TLabel").pack(anchor="w", pady=(6, 2))
+        labels = []
+        title = ttk.Label(self, text=label.upper(), style="TileMetricLabel.TLabel")
+        title.pack(anchor="w")
+        labels.append(title)
+        number = ttk.Label(self, text=value, style="TileMetricValue.TLabel")
+        number.pack(anchor="w", pady=(6, 2))
+        labels.append(number)
         if detail:
-            ttk.Label(self, text=detail, style="MetricDetail.TLabel", wraplength=220).pack(anchor="w")
+            description = ttk.Label(self, text=detail, style="TileMetricDetail.TLabel")
+            description.pack(anchor="w")
+            labels.append(description)
+        self.bind("<Configure>", lambda event: [item.configure(wraplength=max(100,event.width-32)) for item in labels])
 
 
 class StatusPill(ttk.Label):

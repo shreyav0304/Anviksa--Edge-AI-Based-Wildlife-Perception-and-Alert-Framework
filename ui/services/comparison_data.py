@@ -87,6 +87,14 @@ def load_comparison_records() -> tuple[ModelComparisonRecord, ...]:
                     raise ValueError(f"Published comparison mismatch for {model}: {field}")
             snake_f1[model] = float(summary["Snake Macro F1"])
 
+    # Recompute historical metrics and score summaries from the actual labeled predictions.
+    from .evaluation import prediction_metrics
+    import numpy as np
+    recomputed = {}
+    for model, slug in (("Custom CNN", "custom_cnn"), ("MobileNetV2", "mobilenet_v2"), ("MobileNetV3 Large", "mobilenet_v3_large")):
+        with np.load(PROJECT_ROOT / "results/model_comparison_dashboard" / f"prediction_probabilities_{slug}.npz", allow_pickle=False) as saved:
+            classes = ("Cow", "Deer", "Elephant", "Monkey", "Non_Venomous_Snake", "Venomous_Snake", "Wild_Boar")
+            recomputed[model] = prediction_metrics(saved["true_labels"], saved["probabilities"], classes)
     records: list[ModelComparisonRecord] = []
     for row in rows:
         model = row["Model"]
@@ -105,6 +113,12 @@ def load_comparison_records() -> tuple[ModelComparisonRecord, ...]:
             numeric_fields = [value for key, value in row.items() if key not in {"Model", "Status", "Algorithm"}]
             if row["Status"] != "INCOMPLETE" or any(value != "N/A" for value in numeric_fields):
                 raise ValueError("EfficientNetB0 must remain INCOMPLETE with N/A metrics")
+        if model in recomputed:
+            actual = recomputed[model]
+            for field, key in (("Accuracy", "accuracy"), ("Macro_Precision", "macro_precision"), ("Macro_Recall", "macro_recall"), ("Macro_F1", "macro_f1"), ("MSE", "mse"), ("Mean_Confidence", "mean_confidence"), ("Median_Confidence", "median_confidence")):
+                if not np.isclose(float(row[field]), actual[key], rtol=0, atol=1e-9):
+                    raise ValueError(f"{model}: {field} differs from saved labeled predictions")
+                row[field] = str(actual[key])
         records.append(ModelComparisonRecord(
             model=model,
             status=row["Status"],

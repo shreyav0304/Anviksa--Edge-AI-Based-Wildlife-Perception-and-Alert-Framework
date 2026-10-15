@@ -145,7 +145,7 @@ class DetectionHistoryService:
     def log_image(self, image_path: Path, **event_values) -> DetectionEvent:
         identifier = new_event_id()
         snapshot = self.copy_image_snapshot(image_path, identifier, event_values["predicted_class"])
-        event = self.create_event(source_type="IMAGE", source_name=str(image_path), snapshot_path=snapshot, event_id=identifier, stable=False, stable_count=0, notes="Explicitly saved image analysis", **event_values)
+        event = self.create_event(source_type="IMAGE", source_name=str(image_path), snapshot_path=snapshot, event_id=identifier, stable=False, stable_count=0, notes=event_values.pop("notes", "Explicitly saved image analysis"), **event_values)
         return self._append(event)
 
     def log_stable_frame(self, image: Image.Image, *, source_type: str, source_name: str,
@@ -170,7 +170,7 @@ class DetectionHistoryService:
                 return None
             identifier = new_event_id()
             snapshot = self.save_snapshot(image, source_type, event_values["predicted_class"], identifier)
-            event = self.create_event(source_type=source_type, source_name=source_name, snapshot_path=snapshot, event_id=identifier, notes=f"Automatic stable event; {self.cooldown_seconds:g}-second duplicate cooldown", **event_values)
+            event = self.create_event(source_type=source_type, source_name=source_name, snapshot_path=snapshot, event_id=identifier, notes=event_values.pop("notes", f"Automatic stable event; {self.cooldown_seconds:g}-second duplicate cooldown"), **event_values)
             self._append(event)
             self._last_event_time[key] = clock
             return event

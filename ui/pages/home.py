@@ -24,17 +24,17 @@ class HomePage(ScrollablePage):
     def _build(self) -> None:
         ttk.Label(self.content, text="VERIFIED PROJECT OVERVIEW", style="Eyebrow.TLabel").pack(anchor="w")
         ttk.Label(self.content, text="Home Dashboard", style="PageTitle.TLabel").pack(anchor="w", pady=(4, 5))
-        ttk.Label(self.content, text="Current validated classifier, deployment readiness, and research status.", style="Muted.TLabel").pack(anchor="w", pady=(0, 20))
+        ttk.Label(self.content, text="Active 15-class Float32 model; metrics recomputed on its 670-image frozen test set.", style="Muted.TLabel").pack(anchor="w", pady=(0, 20))
 
         metrics = ttk.Frame(self.content, style="Page.TFrame")
         metrics.pack(fill="x")
         cards = [
             ("System Status", "Offline Edge AI", "Offline operation supported"),
-            ("Selected Model", self.data.selected_model, "Current best completed classifier"),
+            ("Selected Model", self.data.selected_model, "Active October 2026 training run"),
             ("Deployment Format", self.data.deployment_format, "Validated Float32 and Float16"),
-            ("Number of Classes", str(len(self.data.classes)), "Whole-frame classification"),
-            ("Best Test Accuracy", self._pct(self.data.accuracy), "Controlled frozen test set"),
-            ("Macro F1", self._pct(self.data.macro_f1), "Seven-class macro average"),
+            ("Trained Output Classes", str(len(self.data.classes)), "Whole-frame classification"),
+            ("Float32 Test Accuracy", self._pct(self.data.accuracy), f"{self.data.correct}/{self.data.test_images} frozen test images"),
+            ("Macro F1", self._pct(self.data.macro_f1), f"{len(self.data.classes)}-class macro average"),
             ("Venomous Snake Recall", self._pct(self.data.venomous_recall), "Validated test recall"),
             ("Snake Macro Recall", self._pct(self.data.snake_macro_recall), "Venomous + non-venomous"),
         ]
@@ -49,6 +49,14 @@ class HomePage(ScrollablePage):
         self._model_status(row).grid(row=0, column=0, sticky="nsew", padx=(0, 6))
         self._classes(row).grid(row=0, column=1, sticky="nsew", padx=(6, 0))
 
+        audit = SectionCard(self.content, "What the numbers mean")
+        audit.pack(fill="x", pady=(12, 0))
+        from ..services.evaluation import format_model_score
+        low, high = self.data.accuracy_interval
+        ttk.Label(audit, text=f"Test accuracy: {self.data.correct}/{self.data.test_images} correct; 95% Wilson interval {low:.2%} to {high:.2%}. "
+                  f"Mean model score: {format_model_score(self.data.mean_confidence)}; median: {format_model_score(self.data.median_confidence)}. "
+                  "Scores are uncalibrated outputs, not the probability that a prediction is correct. Test accuracy does not establish field accuracy.",
+                  style="Body.TLabel", wraplength=1050).pack(anchor="w")
         self._pipeline().pack(fill="x", pady=(12, 0))
         self._development_status().pack(fill="x", pady=(12, 0))
         self._edge_status().pack(fill="x", pady=(12, 0))
@@ -56,15 +64,18 @@ class HomePage(ScrollablePage):
 
     def _model_status(self, parent: tk.Misc) -> ttk.Frame:
         card = SectionCard(parent, "Model status")
-        statuses = [("Custom CNN", "COMPLETE", "complete"), ("MobileNetV2", "COMPLETE", "complete"), ("MobileNetV3 Large", "SELECTED", "selected"), ("EfficientNetB0", "INCOMPLETE — resource-limited experiment", "incomplete")]
+        statuses = [("Custom CNN", "COMPLETE", "complete"), ("MobileNetV2", "COMPLETE", "complete"), ("MobileNetV3 Large - 15 classes", "ACTIVE FLOAT32", "selected"), ("EfficientNetB0", "INCOMPLETE — resource-limited experiment", "incomplete")]
         for name, status, kind in statuses:
             line = ttk.Frame(card, style="Card.TFrame"); line.pack(fill="x", pady=5)
-            ttk.Label(line, text=name, style="BodyStrong.TLabel").pack(side="left")
-            StatusPill(line, status, kind).pack(side="right")
+            line.columnconfigure(0, weight=1)
+            ttk.Label(line, text=name, style="BodyStrong.TLabel", wraplength=240).grid(row=0, column=0, sticky="w")
+            pill = StatusPill(line, status, kind)
+            pill.configure(wraplength=180)
+            pill.grid(row=0, column=1, sticky="e")
         return card
 
     def _classes(self, parent: tk.Misc) -> ttk.Frame:
-        card = SectionCard(parent, "Current classification classes")
+        card = SectionCard(parent, "Active model output classes")
         for index, name in enumerate(self.data.classes, 1):
             label = name.replace("_", "-")
             ttk.Label(card, text=f"{index:02d}   {label}", style="Body.TLabel").pack(anchor="w", pady=3)
@@ -110,6 +121,6 @@ class HomePage(ScrollablePage):
         card = SectionCard(self.content, "Safety and model limitations")
         warning = "AI predictions are intended for wildlife monitoring and project research. Snake classification should not be used as the sole basis for approaching or handling an unidentified snake."
         ttk.Label(card, text=warning, style="Warning.TLabel", wraplength=1050).pack(fill="x")
-        details = "Seven classes • No Background/Unknown class • No bounding boxes • Real-world field performance requires additional validation"
+        details = "15 trained output classes • No Background/Unknown class • No bounding boxes • Real-world field performance requires additional validation"
         ttk.Label(card, text=details, style="Muted.TLabel", wraplength=1050).pack(anchor="w", pady=(10, 0))
         return card

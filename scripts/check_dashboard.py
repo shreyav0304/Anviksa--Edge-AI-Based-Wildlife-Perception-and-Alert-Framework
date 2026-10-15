@@ -41,6 +41,22 @@ def main() -> int:
                 raise ValueError(f"Model integrity mismatch: {path}")
         return "Float32, Float16, and Wildlife Gate hashes verified"
 
+    def active_evaluation():
+        import numpy as np
+        from ui.services.evaluation import load_active_evaluation
+        manifest = json.loads((ROOT / "pi_deployment/model_manifest.json").read_text(encoding="utf-8"))
+        details = {}
+        for representation in ("float32", "float16"):
+            actual = load_active_evaluation(representation)
+            entry = next(item for item in manifest["models"] if representation in item["package_path"])
+            if tuple(manifest["class_order"]) != actual["classes"] or entry["output_shape"] != [1,len(actual["classes"])]:
+                raise ValueError("Manifest class/output shape mismatch")
+            if entry["test_images"] != actual["total"] or entry["correct_predictions"] != actual["correct"] or not np.isclose(entry["validation_accuracy"], actual["accuracy"], rtol=0, atol=1e-12):
+                raise ValueError("Manifest accuracy does not match labeled predictions")
+            details[representation] = dict(correct=actual["correct"], total=actual["total"], accuracy=actual["accuracy"])
+        return details
+
+    check("Active 15-class evaluation", active_evaluation)
     check("Model comparison", comparison)
     check("Confusion matrices", matrices)
     check("Overview", overview)

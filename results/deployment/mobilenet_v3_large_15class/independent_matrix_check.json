@@ -1,0 +1,28 @@
+{
+  "method": "Independent sklearn confusion_matrix and accuracy_score on saved Windows full-test predictions; label order verified against original test manifest",
+  "all_225_cells_match": true,
+  "total": 670,
+  "correct": 620,
+  "errors": 50,
+  "accuracy": 0.9253731343283582,
+  "class_supports": {
+    "Big_Cat": 6,
+    "Cat": 12,
+    "Chicken": 7,
+    "Cow": 39,
+    "Deer": 72,
+    "Dog": 12,
+    "Elephant": 79,
+    "Goat": 49,
+    "Monkey": 28,
+    "Mouse": 7,
+    "Non_Venomous_Snake": 128,
+    "Pig": 15,
+    "Sheep": 17,
+    "Venomous_Snake": 141,
+    "Wild_Boar": 58
+  },
+  "nonvenomous_as_venomous": 16,
+  "venomous_as_nonvenomous": 11,
+  "limitation": "This verifies arithmetic and label alignment, not independent expert verification of image ground truth."
+}

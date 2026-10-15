@@ -1,0 +1,12 @@
+{
+  "total": 670,
+  "correct": 620,
+  "accuracy": 0.9253731343283582,
+  "macro_f1": 0.917681885084472,
+  "mean_confidence": 0.9358147907168118,
+  "median_confidence": 0.9965867698192596,
+  "ece": 0.02835555890602853,
+  "interpreter": "ai_edge_litert.interpreter.Interpreter (Windows built-in kernels)",
+  "top1_matches_linux_reference": 670,
+  "test_hashes_verified": 670
+}

@@ -14,6 +14,7 @@ from ..services.image_inference import friendly_name
 from ..services.image_inference import CATEGORIES
 from ..services.detection_history import DetectionHistoryService
 from ..services.video_inference import VideoInferenceWorker, VideoSourceInfo, VideoUpdate, inspect_video
+from ..services.evaluation import format_model_score
 from .base import ScrollablePage
 
 
@@ -78,7 +79,7 @@ class VideoAnalysisPage(ScrollablePage):
         self.result_vars = {name: tk.StringVar(value="—") for name in names}
         for name in names:
             row = ttk.Frame(result_card, style="Card.TFrame"); row.pack(fill="x", pady=3)
-            ttk.Label(row, text=name.upper(), style="MetricLabel.TLabel").pack(anchor="w")
+            ttk.Label(row, text=("MODEL SCORE (UNCALIBRATED)" if name == "Confidence" else name.upper()), style="MetricLabel.TLabel").pack(anchor="w")
             ttk.Label(row, textvariable=self.result_vars[name], style="ResultValue.TLabel", wraplength=400).pack(anchor="w")
         self.snake_warning = ttk.Label(result_card, text="Do not approach or handle an unidentified snake. AI classification is not a substitute for expert identification.", style="Warning.TLabel", wraplength=420)
 
@@ -86,11 +87,11 @@ class VideoAnalysisPage(ScrollablePage):
         self.stat_vars = {name: tk.StringVar(value="0") for name in ("Frames Captured", "Frames Processed", "Source FPS", "Processed FPS", "Average Inference", "Stable Events")}
         for name, variable in self.stat_vars.items():
             cell = ttk.Frame(stats, style="Card.TFrame"); cell.pack(side="left", fill="x", expand=True, padx=6)
-            ttk.Label(cell, text=name.upper(), style="MetricLabel.TLabel").pack(anchor="w")
+            ttk.Label(cell, text=("MODEL SCORE (UNCALIBRATED)" if name == "Confidence" else name.upper()), style="MetricLabel.TLabel").pack(anchor="w")
             ttk.Label(cell, textvariable=variable, style="BodyStrong.TLabel").pack(anchor="w", pady=(3, 0))
         limitation = SectionCard(self.content, "Model limitation"); limitation.pack(fill="x", pady=(12, 0))
-        ttk.Label(limitation, text="Current model has no Background/Unknown class. Empty-scene webcam predictions should be treated as exploratory.", style="Warning.TLabel", wraplength=1050).pack(fill="x")
-        ttk.Label(limitation, text="Confident, stable wildlife sightings are saved to Detection History with runtime snapshots. Uncertain and gate-rejected frames are not logged as detections.", style="Notice.TLabel", wraplength=1050).pack(anchor="w", pady=(8, 0))
+        ttk.Label(limitation, text="The active 15-class model has no Background/Unknown class. The legacy wildlife gate is bypassed because its coverage is unvalidated for the added classes. Empty-scene webcam predictions should be treated as exploratory.", style="Warning.TLabel", wraplength=1050).pack(fill="x")
+        ttk.Label(limitation, text="Stable predictions above the configured score threshold are saved with runtime snapshots. High model scores can be wrong; smoothing and stability do not calibrate confidence.", style="Notice.TLabel", wraplength=1050).pack(anchor="w", pady=(8, 0))
 
     def _mode_changed(self) -> None:
         self.stop()
@@ -231,15 +232,15 @@ class VideoAnalysisPage(ScrollablePage):
             if (self._displayed_gate_state != "UNCERTAIN"
                     or self.session_status.get().startswith("Stable event saved:")):
                 self.session_status.set("Gate uncertain - species classification paused")
-        elif update.gate is not None and update.gate.decision == "WILDLIFE" and update.analysis is not None:
+        elif (update.gate is None or update.gate.decision == "WILDLIFE") and update.analysis is not None:
             saved_episode = (update.episode_key, update.analysis.predicted_class)
             if (self._displayed_gate_state not in (None, "WILDLIFE")
                     or (self.session_status.get().startswith("Stable event saved:")
                         and self._saved_stable_episode != saved_episode)):
                 self.session_status.set("Wildlife analysis running")
             self._show_analysis(update.analysis)
-            self.result_vars["Gate"].set("WILDLIFE")
-            self.result_vars["Gate Score"].set(f"Wildlife Score: {update.gate.wildlife_probability*100:.2f}%")
+            self.result_vars["Gate"].set("BYPASSED - expanded class coverage unvalidated")
+            self.result_vars["Gate Score"].set("Not evaluated")
             self._persist_eligible_event(update)
         if update.gate is not None:
             self._displayed_gate_state = update.gate.decision
@@ -258,7 +259,7 @@ class VideoAnalysisPage(ScrollablePage):
 
     def _show_analysis(self, result) -> None:
         analysis = "Potential High-Risk Wildlife" if result.predicted_class == "Venomous_Snake" and result.status != "UNCERTAIN" else "Low-confidence classification — manual verification recommended" if result.status == "UNCERTAIN" else "Wildlife Detected"
-        values = {"Prediction": friendly_name(result.predicted_class), "Confidence": f"{result.confidence*100:.2f}% ({result.confidence_level})", "Top-2": f"{friendly_name(result.top2_class)} — {result.top2_probability*100:.2f}%", "Margin": f"{result.margin*100:.2f} percentage points", "Status": result.status, "Stable Count": str(result.stable_count), "Inference": f"{result.inference_time_ms:.2f} ms", "Processed FPS": self.stat_vars["Processed FPS"].get(), "Analysis": analysis}
+        values = {"Prediction": friendly_name(result.predicted_class), "Confidence": f"{format_model_score(result.confidence)} ({result.confidence_level} score)", "Top-2": f"{friendly_name(result.top2_class)} — {result.top2_probability*100:.2f}%", "Margin": f"{result.margin*100:.2f} percentage points", "Status": result.status, "Stable Count": str(result.stable_count), "Inference": f"{result.inference_time_ms:.2f} ms", "Processed FPS": self.stat_vars["Processed FPS"].get(), "Analysis": analysis}
         for key, value in values.items(): self.result_vars[key].set(value)
         if result.predicted_class in {"Venomous_Snake", "Non_Venomous_Snake"}: self.snake_warning.pack(fill="x", pady=(10, 0))
         else: self.snake_warning.pack_forget()
@@ -304,7 +305,7 @@ class VideoAnalysisPage(ScrollablePage):
 
     def _persist_eligible_event(self, update: VideoUpdate) -> None:
         result = update.analysis
-        if (result is None or update.gate is None or update.gate.decision != "WILDLIFE"
+        if (result is None or (update.gate is not None and update.gate.decision != "WILDLIFE")
                 or update.frame_rgb is None or not update.episode_key):
             return
         episode = (update.episode_key, result.predicted_class)
@@ -323,6 +324,7 @@ class VideoAnalysisPage(ScrollablePage):
                 uncertain=result.status == "UNCERTAIN", stable=result.stable,
                 stable_count=result.stable_count, inference_time_ms=result.inference_time_ms,
                 frame_number=str(update.frames_captured), video_time_seconds=video_time,
+                notes="Automatic stable event; 15-class Float32; run mobilenetv3large_15class_gpu_20261011_123242; smoothed uncalibrated score; legacy gate bypassed",
             )
         except (OSError, ValueError, RuntimeError) as exc:
             self.session_status.set(f"History logging warning: {exc}")

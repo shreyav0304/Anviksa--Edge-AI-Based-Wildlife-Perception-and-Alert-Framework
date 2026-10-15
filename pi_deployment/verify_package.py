@@ -8,20 +8,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent
-EXPECTED_CLASSES = [
-    "Cow", "Deer", "Elephant", "Monkey", "Non_Venomous_Snake",
-    "Venomous_Snake", "Wild_Boar",
-]
-EXPECTED_MODELS = {
-    "models/mobilenet_v3_large_float32.tflite": (
-        "086b94af27c4669710a0afb54a1ce0efdb1d37b01d4dcba8c15c5d7de32c5ac7",
-        12920548,
-    ),
-    "models/mobilenet_v3_large_float16.tflite": (
-        "5b9e7763e605c7e5f8081dcf12c2ff6afd1cb1d7cd0f6f3cda909e07d1e7c4e5",
-        6549452,
-    ),
-}
+EXPECTED_CLASSES = ['Big_Cat', 'Cat', 'Chicken', 'Cow', 'Deer', 'Dog', 'Elephant', 'Goat', 'Monkey', 'Mouse', 'Non_Venomous_Snake', 'Pig', 'Sheep', 'Venomous_Snake', 'Wild_Boar']
+EXPECTED_MODELS = {'models/anviksa_15class_float32.tflite': ('36494a90660ac550e1e6db753861a8024d14eefd2c23e229d955f70673b6585a', 11976156), 'models/anviksa_15class_float16.tflite': ('46109f6b5702fd4927d94fd6a5688dce172f48f9ce05e20a735af093e722bf6c', 6066664)}
 REQUIRED_FILES = [
     "benchmark/benchmark_tflite.py",
     "benchmark/compare_pi_results.py",
@@ -59,7 +47,7 @@ def main() -> None:
 
     class_path = ROOT / "inference/class_names.json"
     classes = read_object("inference/class_names.json", list)
-    checks.append({"check": "exact seven-class order", "pass": classes == EXPECTED_CLASSES})
+    checks.append({"check": "exact deployed 15-class order", "pass": classes == EXPECTED_CLASSES})
 
     manifest_path = ROOT / "model_manifest.json"
     manifest = read_object("model_manifest.json", dict)

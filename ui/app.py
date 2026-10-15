@@ -48,6 +48,13 @@ class AnviksaApp(tk.Tk):
             bold = name in {"PageTitle", "BodyStrong", "Section", "ResultValue", "Winner", "MetricValue"}
             style.configure(name + ".TLabel", foreground="#173a2e", background="#ffffff",
                             font=(family, size, "bold" if bold else "normal"))
+        style.configure("PageBody.TLabel", background="#f2f5f3", foreground="#53665c")
+        for name in ("Eyebrow", "PageTitle", "Muted"):
+            style.configure(name + ".TLabel", background="#f2f5f3")
+        for name in ("MetricLabel", "MetricValue", "MetricDetail"):
+            style.configure("Tile" + name + ".TLabel", background="#e9efec", foreground="#173a2e", font=(family, 18 if name == "MetricValue" else 9, "bold" if name == "MetricValue" else "normal"))
+        style.configure("Pipeline.TLabel", background="#ffffff", foreground="#173a2e")
+        style.configure("Arrow.TLabel", background="#ffffff", foreground="#53665c")
         style.configure("Warning.TLabel", foreground="#9d3b25")
         style.configure("Muted.TLabel", foreground="#53665c")
         style.configure("Title.TLabel", background="#153a2f", foreground="#ffffff", font=(family, 16, "bold"))
@@ -65,6 +72,7 @@ class AnviksaApp(tk.Tk):
         root.pack(fill="both", expand=True)
         sidebar = ttk.Frame(root, style="Sidebar.TFrame", width=210)
         sidebar.pack(side="left", fill="y")
+        self.sidebar = sidebar
         sidebar.pack_propagate(False)
         header = ttk.Frame(sidebar, style="Sidebar.TFrame")
         header.pack(fill="x", padx=14, pady=(8, 6))
@@ -90,11 +98,53 @@ class AnviksaApp(tk.Tk):
         self.bind("<MouseWheel>", self._scroll_navigation, add="+")
         right = ttk.Frame(root, style="Page.TFrame")
         right.pack(side="left", fill="both", expand=True)
+        self.section_var = tk.StringVar(value=dict(NAV_ITEMS)["home"])
+        toolbar = ttk.Frame(right, style="Page.TFrame", padding=(8, 6))
+        toolbar.pack(fill="x")
+        ttk.Label(toolbar, text="Section", style="PageBody.TLabel").pack(side="left", padx=(0, 8))
+        self.section_picker = ttk.Combobox(
+            toolbar, textvariable=self.section_var, values=tuple(dict(NAV_ITEMS).values()),
+            state="readonly", width=24,
+        )
+        self.section_picker.pack(side="left", fill="x", expand=True)
+        self.section_picker.bind("<<ComboboxSelected>>", self._select_section)
+        self.bind("<Configure>", self._adapt_navigation, add="+")
+        for index, (key, _label) in enumerate(NAV_ITEMS, 1):
+            self.bind(f"<Alt-Key-{index}>", lambda _event, page=key: self.show_page(page))
         self.page_host = ttk.Frame(right, style="Page.TFrame")
         self.page_host.pack(fill="both", expand=True)
-        status = ttk.Label(right, textvariable=self.status_var, style="Muted.TLabel", padding=(8, 4), wraplength=700)
+        status = ttk.Label(right, textvariable=self.status_var, style="PageBody.TLabel", padding=(8, 4), wraplength=700)
         status.pack(fill="x")
         right.bind("<Configure>", lambda event: status.configure(wraplength=max(160, event.width - 20)))
+
+    def _select_section(self, _event=None) -> None:
+        selected = self.section_var.get()
+        for key, label in NAV_ITEMS:
+            if label == selected:
+                self.show_page(key)
+                break
+
+    def _adapt_navigation(self, event) -> None:
+        if event.widget is not self:
+            return
+        # Leave room for content on Pi touchscreens; the section picker is always available.
+        if event.width < 900:
+            self.sidebar.pack_forget()
+        elif not self.sidebar.winfo_manager():
+            self.sidebar.pack(side="left", fill="y", before=self.sidebar.master.winfo_children()[1])
+
+    def _reveal_navigation(self, key) -> None:
+        self.nav_canvas.update_idletasks()
+        button = self._nav_buttons[key]
+        height = max(1, self.nav_frame.winfo_height())
+        top = button.winfo_y()
+        bottom = top + button.winfo_height()
+        visible_top = self.nav_canvas.canvasy(0)
+        visible_bottom = visible_top + self.nav_canvas.winfo_height()
+        if top < visible_top:
+            self.nav_canvas.yview_moveto(top / height)
+        elif bottom > visible_bottom:
+            self.nav_canvas.yview_moveto((bottom - self.nav_canvas.winfo_height()) / height)
 
     def _scroll_navigation(self, event) -> None:
         widget = self.winfo_containing(event.x_root, event.y_root)
@@ -102,7 +152,7 @@ class AnviksaApp(tk.Tk):
             widget = getattr(widget, "master", None)
         if widget is None:
             return
-        delta = -1 if getattr(event, "num", None) == 4 else 1 if getattr(event, "num", None) == 5 else int(-event.delta / 120)
+        delta = -1 if getattr(event, "num", None) == 4 else 1 if getattr(event, "num", None) == 5 else (-1 if event.delta > 0 else 1 if event.delta < 0 else 0)
         self.nav_canvas.yview_scroll(delta, "units")
 
     def _make_page(self, key):
@@ -171,6 +221,8 @@ class AnviksaApp(tk.Tk):
             self._pages[key] = page
             page.place(relx=0, rely=0, relwidth=1, relheight=1)
         self._current_page = key
+        self.section_var.set(dict(NAV_ITEMS)[key])
+        self._reveal_navigation(key)
         page = self._pages[key]
         page.tkraise()
         self.status_var.set("Section unavailable; see details and retry." if key in self._failed_pages else dict(NAV_ITEMS)[key])

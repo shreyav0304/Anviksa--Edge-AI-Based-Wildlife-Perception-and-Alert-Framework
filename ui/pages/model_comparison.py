@@ -9,6 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import numpy as np
 
+from ..services.evaluation import load_active_evaluation, format_model_score
 from ..components import SectionCard, StatusPill
 from ..services.comparison_data import EXPECTED_FINGERPRINT, ModelComparisonRecord
 from .base import ScrollablePage
@@ -34,7 +35,7 @@ class ModelComparisonPage(ScrollablePage):
 
     @staticmethod
     def _percent(value: float | None) -> str:
-        return "N/A" if value is None else f"{value * 100:.2f}%"
+        return "N/A" if value is None else format_model_score(value)
 
     @staticmethod
     def _number(value: float | None, digits: int = 6) -> str:
@@ -43,17 +44,28 @@ class ModelComparisonPage(ScrollablePage):
     def _build(self) -> None:
         ttk.Label(self.content, text="VALIDATED EXPERIMENT RESULTS", style="Eyebrow.TLabel").pack(anchor="w")
         ttk.Label(self.content, text="Model Comparison", style="PageTitle.TLabel").pack(anchor="w", pady=(4, 4))
-        ttk.Label(self.content, text="Completed models evaluated on the same frozen 545-image test set.", style="Muted.TLabel").pack(anchor="w")
+        ttk.Label(self.content, text="Historical baseline comparison only: seven classes on the same frozen 545-image test set.", style="Muted.TLabel").pack(anchor="w")
 
+        current = load_active_evaluation()
+        active = SectionCard(self.content, "Active deployment - 15 classes / 670 test images")
+        active.pack(fill="x", pady=(14, 10))
+        ttk.Label(active, text=f"Float32: {current['correct']}/{current['total']} correct ({current['accuracy']:.2%}); Macro F1 {current['macro_f1']:.2%}. "
+                  f"Mean model score {format_model_score(current['mean_confidence'])}; median {format_model_score(current['median_confidence'])}.",
+                  style="BodyStrong.TLabel", wraplength=1050).pack(anchor="w")
+        ttk.Label(active, text=f"Uncalibrated scores. Mean score on errors: {format_model_score(current['error_mean_confidence'])}; "
+                  f"errors with score >=99%: {current['errors_above_99']}; saturated scores: {current['saturated_scores']}/{current['total']}. "
+                  f"15-bin expected calibration error: {current['ece']:.4f} (descriptive test statistic, not a calibration fit). "
+                  "The historical charts below use a different 7-class / 545-image test set; they do not rank the active model against those baselines.",
+                  style="Body.TLabel", wraplength=1050).pack(anchor="w", pady=(8, 0))
         status_row = ttk.Frame(self.content, style="Page.TFrame"); status_row.pack(fill="x", pady=(14, 10))
         for record in self.records:
             card = ttk.Frame(status_row, style="Metric.TFrame", padding=(13, 10)); card.pack(side="left", fill="x", expand=True, padx=4)
             ttk.Label(card, text=record.model, style="BodyStrong.TLabel").pack(anchor="w")
             kind = "selected" if record.model == "MobileNetV3 Large" else "incomplete" if record.status == "INCOMPLETE" else "complete"
-            text = "SELECTED" if kind == "selected" else record.status
+            text = "HISTORICAL WINNER" if kind == "selected" else record.status
             StatusPill(card, text, kind).pack(anchor="w", pady=(6, 0))
 
-        winner = SectionCard(self.content, "Best validated classification model"); winner.pack(fill="x")
+        winner = SectionCard(self.content, "Best historical seven-class baseline"); winner.pack(fill="x")
         left = ttk.Frame(winner, style="Card.TFrame"); left.pack(side="left", fill="both", expand=True)
         ttk.Label(left, text="MobileNetV3 Large", style="Winner.TLabel").pack(anchor="w")
         ttk.Label(left, text="Highest test accuracy and Macro F1 • Lowest probability MSE • Highest venomous-snake and snake macro recall", style="Body.TLabel", wraplength=700).pack(anchor="w", pady=(5, 0))
@@ -100,7 +112,8 @@ class ModelComparisonPage(ScrollablePage):
         for index, (field, label) in enumerate(zip(fields, labels, strict=True)):
             values = [getattr(record, field) * (100 if percentage else 1) for record in self.completed]
             bars = self.axis.bar(x + (index - (len(fields)-1)/2) * width, values, width, label=label, color=colors[index % len(colors)], zorder=3)
-            self.axis.bar_label(bars, fmt="%.2f%%" if percentage else "%.6f", padding=3, fontsize=8)
+            bar_labels = [format_model_score(value/100) for value in values] if percentage and "confidence" in field else None
+            self.axis.bar_label(bars, labels=bar_labels, fmt="%.2f%%" if percentage else "%.6f", padding=3, fontsize=8)
         self.axis.set_xticks(x, names)
         self.axis.set_title(title, fontweight="bold", color="#173a2e")
         if percentage: self.axis.set_ylim(0, 108); self.axis.set_ylabel("Score (%)")
@@ -116,8 +129,8 @@ class ModelComparisonPage(ScrollablePage):
         self.graph_note.configure(text="MSE measures the average squared difference between the one-hot ground-truth vector and the predicted seven-class probability vector: 1/(N × C) over N=545 images and C=7 classes.")
 
     def _confidence_graph(self) -> None:
-        self._grouped(("mean_confidence", "median_confidence"), ("Mean Top-1 Confidence", "Median Top-1 Confidence"), True, "Prediction Confidence")
-        self.graph_note.configure(text="Confidence measures the model's Top-1 predicted probability and is not the same as classification accuracy. MobileNetV3 Large's stored median is 0.9999572038650513, displayed as 100.00%.")
+        self._grouped(("mean_confidence", "median_confidence"), ("Mean Top-1 Confidence", "Median Top-1 Confidence"), True, "Historical Uncalibrated Model Scores")
+        self.graph_note.configure(text="Historical raw Top-1 model scores, recomputed from stored probabilities. Near-one scores retain extra precision; exact 1.0 is labeled saturated. These scores are uncalibrated and do not measure classification accuracy.")
 
     def _snake_graph(self) -> None:
         self._grouped(("venomous_recall", "snake_macro_recall", "snake_macro_f1"), ("Venomous Snake Recall", "Snake Macro Recall", "Snake Macro F1"), True, "Snake-Class Performance")
