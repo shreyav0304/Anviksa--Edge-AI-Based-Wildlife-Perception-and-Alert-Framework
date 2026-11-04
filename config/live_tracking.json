@@ -1,0 +1,10 @@
+{
+  "simulation": false,
+  "camera": {"source": 0, "width": 640, "height": 480, "fps": 10, "stale_seconds": 2},
+  "microphone": {"device": "plughw:3,0", "card_hint": "inmp441|i2s", "threshold": 0.035, "stale_seconds": 2},
+  "radar": {"device": "/dev/serial0", "baud": 9600, "stale_seconds": 5, "partial_timeout": 1, "allow_dfdmd_25m": false},
+  "gpio": {"led1": 17, "led2": 27, "led3": 22, "buzzer": 23, "button": 24},
+  "alerts": {"led1": "activity_or", "led2": "activity_and", "led3": "button", "buzzer": "button", "beep_seconds": 0.5, "debounce_seconds": 0.04},
+  "tracking": {"min_area_fraction": 0.003, "max_objects": 8, "max_match_distance": 0.18, "expiry_seconds": 1, "warmup_frames": 20, "trail_length": 12},
+  "classification": {"enabled": true, "interval_seconds": 0.5, "stale_seconds": 3, "score_threshold": 0.85, "stable_results": 3, "risk_classes": ["Big_Cat", "Elephant", "Venomous_Snake", "Wild_Boar"]}
+}

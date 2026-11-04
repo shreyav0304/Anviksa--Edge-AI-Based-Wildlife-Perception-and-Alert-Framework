@@ -21,13 +21,14 @@ On Raspberry Pi, activate the documented `.venv` and run `python run_ui.py`. Use
 | Overview | Selected model, validated metrics, classes, and project status |
 | Image Analysis | Local image classification, class probabilities, confidence, and explicitly saved detections |
 | Video / Webcam | Recorded videos or USB webcam frames, probability smoothing, and stable sightings |
+| Live Wildlife Tracking | Camera-relative motion map, region IDs, exploratory crop classification, concurrent Pi sensors, button/GPIO alerts, explicit simulation. See [setup and hardware tests](docs/live_wildlife_tracking.md). |
 | Model Comparison | Accuracy, precision, recall, F1, probability MSE, confidence, and snake-class performance |
 | Confusion Matrix | Active matrix or three separate stacked historical matrices, counts or row percentages, class keys, and exact cell details |
 | Detection History | Local events, filters, snapshots, summaries, and CSV export |
 | System Deployment | Device information, model-file availability, integration status, and launch instructions |
 | About Project | Purpose, perception pipeline, classes, research results, and documentation |
 
-The Section picker at the top always lists all eight sections. Below 900 pixels wide, the sidebar hides to leave more room for content; it returns when the window is widened. Alt+1 through Alt+8 also switch sections. Wide tables and plots remain accessible with the bottom scrollbar or Shift + mouse wheel; a hint appears when horizontal scrolling is needed. Navigation automatically scrolls to the selected sidebar button. Desktop regression checks cover **1180x720**, **800x480**, and **480x320**, including section selection and horizontal scrolling. Pages load independently; a failed section shows its error and a Retry button while other sections remain available.
+The Section picker at the top always lists all nine sections. Below 900 pixels wide, the sidebar hides to leave more room for content; it returns when the window is widened. Alt+1 through Alt+9 also switch sections. Wide tables and plots remain accessible with the bottom scrollbar or Shift + mouse wheel; a hint appears when horizontal scrolling is needed. Navigation automatically scrolls to the selected sidebar button. Desktop regression checks cover **1180x720**, **800x480**, and **480x320**, including section selection and horizontal scrolling. Pages load independently; a failed section shows its error and a Retry button while other sections remain available.
 
 Comparison pages read committed summaries and frozen prediction caches. Private historical training runs and dashboard regeneration are not required. EfficientNetB0 shows **N/A** because its controlled experiment was incomplete.
 

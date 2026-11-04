@@ -46,11 +46,11 @@ class ProjectInfoPage(ScrollablePage):
                 self._section("Deployment models", "\n".join(lines))
             except (OSError, ValueError, KeyError) as exc:
                 self._section("Deployment models", f"Manifest unavailable: {exc}")
-            self._section("Integration status", "Image and video inference and USB webcam controls are implemented. Camera access depends on device configuration.\nPhysical Raspberry Pi benchmarking: pending.\nmmWave trigger, GPIO LED/buzzer, and solar field integration: planned; not hardware-verified.")
+            self._section("Integration status", "Image/video inference and USB webcam controls are implemented. Live Wildlife Tracking adds a camera-relative motion map, INMP441 RMS, C4001 UART presence, LEDs, buzzer and button with explicit simulation.\nPhysical Raspberry Pi benchmarking and hardware acceptance: pending. Solar field integration: planned.\nHardware setup and tests: docs/live_wildlife_tracking.md")
             self._section("Local launch", "From the repository root in the Raspberry Pi desktop terminal:\nsource .venv/bin/activate\npython run_ui.py\n\nSetup guide: docs/raspberry_pi_setup.md")
         else:
             self._section("Anviksa AI", "Edge AI-Based Wildlife Perception and Alert Framework. Offline wildlife classification near agricultural land, forest borders, and residential areas.")
-            self._section("Perception pipeline", "Motion/presence trigger (planned) -> camera frame -> RGB preprocessing -> MobileNetV3 Large -> class and confidence -> application threat metadata -> local history and snapshot storage.\nThe classifier labels a whole frame; it does not locate animals with bounding boxes.")
+            self._section("Perception pipeline", "Camera frame -> RGB preprocessing -> MobileNetV3 Large -> class/model score -> local history and snapshots on existing analysis pages.\nLive Wildlife Tracking separately localizes motion regions and tracks camera-relative centroids, with exploratory crop classification and scene-level radar corroboration. The classifier itself supplies no bounding boxes or real-world positions.")
             self._section("Research and deployment", "The active 15-class model was trained in run mobilenetv3large_15class_gpu_20261011_123242. Both exports were evaluated on all 670 original hash-verified test images. "
                           "Historical CNN, MobileNetV2, and MobileNetV3 baselines used seven classes and 545 test images; their metrics describe a different evaluation. "
                           "The original wildlife gate is bypassed because its coverage has not been validated for the expanded classes. Raspberry Pi hardware benchmarking remains pending.")
