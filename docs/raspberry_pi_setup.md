@@ -1,5 +1,10 @@
 # ANVIKSA Raspberry Pi software setup
 
+Update: the optional integrated hardware and Live Wildlife Tracking page is now
+implemented. Follow [the current integration guide](live_wildlife_tracking.md)
+for ALSA/UART/GPIO dependencies, setup, simulation and physical acceptance tests.
+The historical dependency audit below predates these optional modules.
+
 This prepares the complete existing Tkinter application for Raspberry Pi 4.
 It documents dependencies and the desktop dashboard. Physical hardware integration remains a separate validation step. The deployment model remains
 **MobileNetV3 Large V1 Float32 TFLite**. V2/V3 experiments are not deployment models.

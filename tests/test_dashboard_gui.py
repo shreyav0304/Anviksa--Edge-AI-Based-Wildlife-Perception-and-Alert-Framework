@@ -1,6 +1,7 @@
 """Opt-in desktop checks: ANVIKSA_GUI_TESTS=1 python -m unittest discover -s tests."""
 from __future__ import annotations
 import os
+import time
 import unittest
 from unittest.mock import patch
 from concurrent.futures import Future
@@ -8,6 +9,28 @@ from pathlib import Path
 
 @unittest.skipUnless(os.environ.get("ANVIKSA_GUI_TESTS") == "1", "requires an active Tk desktop")
 class DashboardTests(unittest.TestCase):
+    def test_live_simulation_preview_map_and_page_switch_cleanup(self):
+        self.app.show_page("tracking")
+        self.app.update()
+        page = self.app._pages["tracking"]
+        page.simulation.set(True)
+        page.start()
+        self.addCleanup(page.stop)
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline and page.photo is None:
+            self.app.update()
+            time.sleep(.02)
+        self.assertIsNotNone(page.photo)
+        self.assertIn("SIMULATION", page.status.get())
+        self.assertIn("ID 1", page.track_text.get())
+        self.assertEqual(set(page.positions), {1, 2})
+        service = page.service
+        self.app.show_page("video")
+        self.app.update()
+        self.assertFalse(service.running)
+        self.assertIsNone(page.poll_id)
+        self.assertFalse(service.hardware.snapshot()["gpio"]["buzzer"])
+
     def setUp(self):
         from ui.app import AnviksaApp
         self.app = AnviksaApp()
@@ -16,7 +39,7 @@ class DashboardTests(unittest.TestCase):
         self.addCleanup(self.app.close)
 
     def test_every_page_and_matrix_column_at_pi_resolutions(self):
-        self.assertEqual(len(self.app._nav_buttons), 8)
+        self.assertEqual(len(self.app._nav_buttons), 9)
         for size in ("800x480", "480x320"):
             self.app.geometry(size + "+10000+10000")
             self.app.update()

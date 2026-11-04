@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import signal
 import tkinter as tk
 from tkinter import font as tkfont, ttk
 from importlib import import_module
@@ -11,6 +12,7 @@ NAV_ITEMS = (
     ("home", "Overview"), ("image", "Image Analysis"), ("video", "Video / Webcam"),
     ("comparison", "Model Comparison"), ("confusion", "Confusion Matrix"),
     ("history", "Detection History"), ("system", "System Deployment"), ("about", "About Project"),
+    ("tracking", "Live Wildlife Tracking"),
 )
 
 class AnviksaApp(tk.Tk):
@@ -164,6 +166,7 @@ class AnviksaApp(tk.Tk):
             from ui.pages.project_info import ProjectInfoPage
             return ProjectInfoPage(self.page_host, dict(NAV_ITEMS)[key], self.history_service.root)
         modules = {
+            "tracking": ("live_tracking", "LiveTrackingPage"),
             "image": ("image_analysis", "ImageAnalysisPage"),
             "video": ("video_analysis", "VideoAnalysisPage"),
             "history": ("detection_history", "DetectionHistoryPage"),
@@ -258,7 +261,16 @@ def main() -> int:
     except tk.TclError as exc:
         LOG.error("Cannot open the desktop interface: %s. Launch from an active graphical desktop; plain SSH has no display.", exc)
         return 1
-    app.mainloop()
+    previous_signals = {}
+    for signum in (signal.SIGINT, signal.SIGTERM):
+        previous_signals[signum] = signal.signal(signum, lambda *_: app.close())
+    try:
+        app.mainloop()
+    finally:
+        if not app._closing:
+            app.close()
+        for signum, handler in previous_signals.items():
+            signal.signal(signum, handler)
     return 0
 
 if __name__ == "__main__":
