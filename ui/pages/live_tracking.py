@@ -141,9 +141,10 @@ class LiveTrackingPage(ScrollablePage):
         lines = []
         for track in data["tracks"]:
             result = track["classification"]
-            label = "Animal: Unknown" if result is None else (
+            label = "Human (person detector)" if track.get("is_human", False) else (
+                "Animal: Unknown" if result is None else (
                 f"{result['name']} {result['confidence']:.1%} model score"
-                + (" | RISK REVIEW REQUIRED" if track["risk_candidate"] else ""))
+                + (" | RISK REVIEW REQUIRED" if track["risk_candidate"] else "")))
             lines.append(f"ID {track['id']} | {label} | " +
                          ("operator-confirmed risk" if track["confirmed_risk"] else "unverified") +
                          " | distance/bearing: Unknown")

@@ -9,6 +9,7 @@ from collections import deque
 
 import numpy as np
 
+from .human_detection import HumanDetector, is_human_track
 from .live_hardware import HardwareService, load_config
 from .opencv import require_opencv
 
@@ -109,6 +110,17 @@ class LiveTrackingService:
             if health == "connected":
                 health = "stale"
         for track in tracks:
+            if track.get("is_human", False):
+                track["classification"] = {
+                    "name": "Human",
+                    "confidence": None,
+                    "stable": True,
+                    "updated": now
+                }
+                track["risk_candidate"] = False
+                track["confirmed_risk"] = False
+                track["color"] = "#3498db"
+                continue
             result = results.get(track["id"])
             if result and now - result["updated"] < self.cfg["classification"]["stale_seconds"]:
                 track["classification"] = result
@@ -135,6 +147,10 @@ class LiveTrackingService:
             self.camera_health, self.camera_error = "connected", ""
             active = {t["id"] for t in tracks}
             self.results = {key: value for key, value in self.results.items() if key in active}
+            human_ids = {t["id"] for t in tracks if t.get("is_human", False)}
+            for track_id in human_ids:
+                self.results.pop(track_id, None)
+                self.confirmed.discard(track_id)
             self.confirmed.intersection_update(active)
 
     def _camera(self):
@@ -146,6 +162,15 @@ class LiveTrackingService:
             return
         cfg = self.cfg
         tracker = CentroidTracker(cfg["tracking"])
+        human_detector = None
+        if not cfg["simulation"]:
+            try:
+                human_detector = HumanDetector()
+                print("ANVIKSA HUMAN DETECTOR INITIALIZED")
+            except Exception as exc:
+                print("Human detector unavailable:", exc)
+        last_human_detection = 0.0
+        human_detections = []
         start = time.monotonic()
         while not self.stop_event.is_set():
             cap = None
@@ -195,7 +220,22 @@ class LiveTrackingService:
                         warmup += 1
                         if warmup <= cfg["tracking"]["warmup_frames"]:
                             boxes = []
+                    if human_detector is not None and tick - last_human_detection >= 2.0:
+                        try:
+                            human_detections = human_detector.detect(frame)
+                            last_human_detection = tick
+                        except Exception as exc:
+                            human_detections = []
+                            last_human_detection = tick
+                            print("Human detection error:", exc)
                     tracks = tracker.update(boxes[:cfg["tracking"]["max_objects"]], frame.shape, tick)
+                    for track in tracks:
+                        track["is_human"] = (
+                            not cfg["simulation"]
+                            and human_detector is not None
+                            and tick - last_human_detection < 3.0
+                            and is_human_track(track["box"], human_detections)
+                        )
                     self._publish(frame, tracks)
                     self.stop_event.wait(max(0, 1 / cfg["camera"]["fps"] - (time.monotonic() - tick)))
             except Exception as exc:
@@ -228,7 +268,7 @@ class LiveTrackingService:
         cv2 = require_opencv()
         while not self.stop_event.is_set():
             data = self.snapshot()
-            tracks = [t for t in data["tracks"] if t["observed"]]
+            tracks = [t for t in data["tracks"] if t["observed"] and not t.get("is_human", False)]
             if data["frame"] is not None and tracks:
                 # One ROI per interval; oldest result first. No growing inference queue.
                 track = min(tracks, key=lambda t: (t.get("classification") or {}).get("updated", 0))
